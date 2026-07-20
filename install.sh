@@ -24,7 +24,7 @@ DRY_RUN=false
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
 # Things inside the repo we never want to treat as dotfiles
-EXCLUDE=(".git" ".gitignore" "install.sh" "README.md" "LICENSE")
+EXCLUDE=(".git" ".gitignore" "install.sh" "README.md" "LICENSE", "screenshots")
 
 is_excluded() {
   local rel="$1"
