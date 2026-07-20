@@ -47,7 +47,12 @@ set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'Nybkox/tmux-ukiyo'
 set -g @ukiyo-theme "kanagawa/dragon"
 set -g @ukiyo-ignore-window-colors true
-set -g @ukiyo-color-bg-bar "#181616"
+
+set -g @ukiyo-plugins "cwd ram-usage git"
+set -g @ukiyo-show-powerline false
+set -g @ukiyo-clients-minimum 1
+set -g @ukiyo-cwd-max-dirs "0"
+set -g @ukiyo-cwd-max-chars "0"
 
 # Initialize TPM (Keep this at the very bottom)
 run '~/.tmux/plugins/tpm/tpm'
