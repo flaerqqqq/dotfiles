@@ -4,8 +4,10 @@
 # preserving the same relative path.
 #
 # Usage:
-#   ./install.sh            # actually create the symlinks
-#   ./install.sh --dry-run  # just print what would happen
+#   ./install.sh                          # link everything
+#   ./install.sh --dry-run                # just print what would happen
+#   ./install.sh --only nvim,zsh          # link ONLY these top-level dirs/files
+#   ./install.sh --only nvim --dry-run    # combine flags in any order
 #
 # Repo layout expected (mirrors $HOME):
 #   dotfiles/
@@ -20,11 +22,28 @@ set -euo pipefail
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="$HOME"
 DRY_RUN=false
+ONLY=() # if non-empty, ONLY these top-level paths (relative to repo root) get linked
 
-[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
+# --- parse args ---
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --dry-run)
+    DRY_RUN=true
+    shift
+    ;;
+  --only)
+    IFS=',' read -r -a ONLY <<<"$2"
+    shift 2
+    ;;
+  *)
+    echo "Unknown argument: $1" >&2
+    exit 1
+    ;;
+  esac
+done
 
 # Things inside the repo we never want to treat as dotfiles
-EXCLUDE=(".git" ".gitignore" "install.sh" "README.md" "LICENSE", "screenshots")
+EXCLUDE=(".git" ".gitignore" "install.sh" "README.md" "LICENSE" "screenshots")
 
 is_excluded() {
   local rel="$1"
@@ -34,12 +53,32 @@ is_excluded() {
   return 1
 }
 
+# If --only was given, a file is allowed only when its relative path
+# starts with (or exactly matches) one of the requested entries.
+is_allowed_by_only() {
+  local rel="$1"
+  # No filter set -> everything is allowed
+  [[ ${#ONLY[@]} -eq 0 ]] && return 0
+
+  for want in "${ONLY[@]}"; do
+    # trim possible whitespace around comma-separated entries
+    want="$(echo "$want" | xargs)"
+    [[ "$rel" == "$want" || "$rel" == "$want"/* ]] && return 0
+  done
+  return 1
+}
+
 link_file() {
   local src="$1"                      # absolute path to file in repo
   local rel="${src#"$DOTFILES_DIR"/}" # path relative to repo root
   local dest="$TARGET_DIR/$rel"
 
-  is_excluded "$rel" && return
+  if is_excluded "$rel"; then
+    return 0
+  fi
+  if ! is_allowed_by_only "$rel"; then
+    return 0
+  fi
 
   local dest_parent
   dest_parent="$(dirname "$dest")"
@@ -72,4 +111,8 @@ while IFS= read -r -d '' file; do
   link_file "$file"
 done < <(find "$DOTFILES_DIR" -type f -print0)
 
-$DRY_RUN && echo "Dry run complete. Re-run without --dry-run to apply."
+if $DRY_RUN; then
+  echo "Dry run complete. Re-run without --dry-run to apply."
+fi
+
+exit 0
