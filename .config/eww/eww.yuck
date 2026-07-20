@@ -1,0 +1,65 @@
+;; Define a separate variable for each monitor's ID
+(defvar windows_0 "[]")
+(defvar windows_1 "[]")
+;; Add (defvar windows_2 "[]") etc., if you have more than 2 monitors
+
+(defwidget tab [w]
+  (button :class {w.active ? "tab active" : "tab"}
+          :onclick "hyprctl dispatch \"hl.dsp.focus({ window = 'address:${w.address}' })\""
+          :onrightclick "hyprctl dispatch \"hl.dsp.window.close({ window = 'address:${w.address}' })\""
+    (box :orientation "h"
+         :spacing 6
+         :space-evenly false
+         :halign "center"
+         :valign "center"
+
+      (image :class "tab-icon"
+             :icon {w.icon}
+             :icon-size "small-toolbar")
+
+      (label :class "tab-label"
+             :text {w.title}
+             :limit-width 100
+             :ellipsize "end"
+             :single-line true))))
+
+;; Updated to accept a 'tabs' parameter
+(defwidget tabbar [tabs]
+  (box :class "tabbar"
+       :orientation "h"
+       :space-evenly true
+       :spacing 1
+
+    ;; Loop through the tabs passed from the specific monitor
+    (for w in tabs
+      (tab :w w))))
+
+;; --- WINDOWS FOR EACH MONITOR ---
+
+;; Monitor 0 (Usually your main monitor)
+(defwindow tabbar_0
+  :monitor 0
+  :windowtype "dock"
+  :exclusive true
+  :stacking "fg"
+  :geometry (geometry
+              :x "0"
+              :y "0"
+              :width "100%"
+              :height "30px"
+              :anchor "bottom center")
+  (tabbar :tabs windows_0))
+
+;; Monitor 1 (Usually your secondary monitor)
+(defwindow tabbar_1
+  :monitor 1
+  :windowtype "dock"
+  :exclusive true
+  :stacking "fg"
+  :geometry (geometry
+              :x "0"
+              :y "0"
+              :width "100%"
+              :height "30px"
+              :anchor "bottom center")
+  (tabbar :tabs windows_1))

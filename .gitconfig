@@ -1,0 +1,9 @@
+[user]
+	name = Vitalii Verzun
+	email = vitaliy.vz.main@gmail.com
+[init]
+	defaultBranch = main
+[core]
+	editor = nvim
+[alias]
+	graph = log --graph --oneline --all --decorate

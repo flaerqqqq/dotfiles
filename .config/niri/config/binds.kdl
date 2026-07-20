@@ -1,0 +1,93 @@
+binds {
+    // --- SESSION & SYSTEM ---
+    Super+Alt+Q { quit; }
+
+    // --- WINDOW MANAGEMENT ---
+    Super+Q { close-window; }
+    Super+Alt+Space { toggle-window-floating; }
+    Super+F { fullscreen-window; }
+    Super+D { maximize-column; }
+
+    // --- NAVIGATION (HJKL) ---
+    Super+H { focus-column-left; }
+    Super+L { focus-column-right; }
+    Super+J { focus-window-or-workspace-down; }
+    Super+K { focus-window-or-workspace-up; }
+    Super+U { focus-workspace-down; }
+    Super+I { focus-workspace-up; }
+
+    // --- MOVING WINDOWS (Shift + HJKL) ---
+    Super+Shift+H { move-column-left; }
+    Super+Shift+L { move-column-right; }
+    Super+Shift+U { move-column-to-workspace-down; }
+    Super+Shift+I { move-column-to-workspace-up; }
+    Super+Shift+J { move-window-down-or-to-workspace-down; }
+    Super+Shift+K { move-window-up-or-to-workspace-up; }
+
+    // Focus/Move First/Last
+    Super+Alt+H { focus-column-first; }
+    Super+Alt+L  { focus-column-last; }
+    Super+Shift+Alt+H { move-column-to-first; }
+    Super+Shift+Alt+L  { move-column-to-last; }
+
+    // Stacking: Put window into the column to the left/right
+    Super+BracketLeft  { consume-or-expel-window-left; }
+    Super+BracketRight { consume-or-expel-window-right; }
+
+    // "Eat" the window to the right into your current column
+    Super+Comma  { consume-window-into-column; }
+    // "Spit" the window out of the column back into the ribbon
+    Super+Period { expel-window-from-column; }
+
+    // Tabbed columns
+    Super+T { toggle-column-tabbed-display; }
+
+    // --- SIZING ---
+    Super+Minus { set-column-width "-10%"; }
+    Super+Equal { set-column-width "+10%"; }
+    Super+Shift+Minus { set-window-height "-10%"; }
+    Super+Shift+Equal { set-window-height "+10%"; }
+    Super+R { switch-preset-column-width; }
+
+    // --- WORKSPACES ---
+    Super+1 { focus-workspace 1; }
+    Super+2 { focus-workspace 2; }
+    Super+3 { focus-workspace 3; }
+    Super+4 { focus-workspace 4; }
+
+    Super+Shift+1 { move-window-to-workspace 1; }
+    Super+Shift+2 { move-window-to-workspace 2; }
+    Super+Shift+3 { move-window-to-workspace 3; }
+    Super+Shift+4 { move-window-to-workspace 4; }
+
+    // --- APPLICATIONS ---
+    Super+Space { spawn "rofi" "-show" "drun"; }
+    Super+Return { spawn "kitty"; }
+    Super+W { spawn "zen-browser"; }
+    Super+E { spawn "kitty" "yazi"; }
+    Super+V { spawn "sh" "-c" "cliphist list | rofi -dmenu | cliphist decode | wl-copy"; }
+    Super+B { spawn "blueman-manager"; }
+    Super+N { spawn "kitty" "nmtui"; }
+    Super+C { spawn "idea"; }
+
+    // --- SYSTEM CONTROLS ---
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02-"; }
+    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+
+    XF86AudioPlay        allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioStop        allow-when-locked=true { spawn-sh "playerctl stop"; }
+    //XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
+    //XF85AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
+
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+5%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "5%-"; }
+
+    // --- SCREENSHOTS ---
+    Print { screenshot; }
+    Alt+Print { screenshot-window; }
+
+    // OVERVIEW
+    Super+O repeat=false { toggle-overview; }
+}

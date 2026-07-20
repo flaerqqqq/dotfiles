@@ -1,0 +1,5 @@
+[[mgr.prepend_keymap]]
+on   = [ "e" ]
+run  = 'shell "ouch d -y \"$@\"" --block --confirm'
+desc = "Extract here with ouch"
+

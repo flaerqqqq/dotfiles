@@ -1,0 +1,69 @@
+# mako — Gruvbox pill style
+# ~/.config/mako/config
+# Reload: makoctl reload  |  Dismiss all: makoctl dismiss --all
+
+# ── Position & layer ───────────────────────────────────────────
+anchor=top-right
+layer=overlay
+margin=12
+
+# ── Dimensions ─────────────────────────────────────────────────
+width=340
+height=120
+
+# ── Appearance ─────────────────────────────────────────────────
+background-color=#1d2021e0
+text-color=#ebdbb2ff
+border-color=#a8998438
+border-size=1
+border-radius=24
+padding=12,16
+
+# ── Typography ─────────────────────────────────────────────────
+font=SF Pro Display 12
+
+# ── Content ────────────────────────────────────────────────────
+markup=1
+actions=1
+format=<b>%s</b>\n%b
+max-visible=4
+sort=-time
+
+# ── Behaviour ──────────────────────────────────────────────────
+on-button-left=dismiss
+on-button-middle=dismiss-all
+on-button-right=dismiss
+on-touch=dismiss
+default-timeout=6000
+ignore-timeout=0
+
+# ══════════════════════════════════════════════════════════════
+# URGENCY TIERS
+# ══════════════════════════════════════════════════════════════
+
+[urgency=low]
+background-color=#1d2021cc
+text-color=#a89984ff
+border-color=#a8998420
+default-timeout=3000
+
+[urgency=normal]
+background-color=#1d2021e0
+text-color=#ebdbb2ff
+border-color=#a8998438
+default-timeout=6000
+
+[urgency=high]
+background-color=#1d2021f5
+text-color=#fb4934ff
+border-color=#cc241d99
+border-size=1
+default-timeout=0
+
+# ── Grouped overflow placeholder ───────────────────────────────
+[hidden=1]
+format=%h more notifications
+background-color=#1d2021cc
+text-color=#a89984aa
+border-color=#a8998420
+border-size=1

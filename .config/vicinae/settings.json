@@ -1,0 +1,310 @@
+// This configuration is merged with the default vicinae configuration file, which you can obtain by running the `vicinae config default` command.
+// Every item defined in this file takes precedence over the values defined in the default config or any other imported file.
+//
+// You can make manual edits to this file, however you should keep in mind that this file may be written to by vicinae when a configuration change is made through the GUI.
+// When that happens, any custom comments or formatting will be lost.
+//
+// If you want to maintain a configuration file with your own comments and formatting, you should create a separate file and add it to the 'imports' array.
+//
+// Learn more about configuration at https://docs.vicinae.com/config
+
+{
+   "$schema": "https://vicinae.com/schemas/config.json",
+   "close_on_focus_loss": false,
+   "pop_to_root_on_close": true,
+   "escape_key_behavior": "close_window",
+   "favicon_service": "twenty",
+   "font": {
+      "rendering": "qt",
+      "normal": {
+         "family": "Geist",
+         "size": 12
+      }
+   },
+   "theme": {
+      "dark": {
+         "name": "zenwritten-dark",
+         "icon_theme": "MacTahoe-dark"
+      }
+   },
+   "telemetry": {
+      "system_info": false
+   },
+   "launcher_window": {
+      "rounding": 16,
+      "opacity": 0.6,
+      "client_side_decorations": {
+         "enabled": true,
+         "border_width": 0,
+         "shadow_size": 15
+      },
+      "size": {
+         "width": 770,
+         "height": 580
+      },
+      "compact_mode": {
+         "enabled": false
+      },
+      "layer_shell": {
+         "enabled": false
+      }
+   },
+   "keybinds": {
+      "toggle-action-panel": "control+RETURN"
+   },
+   "providers": {
+      "@Keyruu/store.raycast.zen-browser": {
+         "enabled": false
+      },
+      "@dagimg-dot/store.vicinae.player-pilot": {
+         "entrypoints": {
+            "pause-track": {
+               "enabled": true
+            },
+            "player-pilot": {
+               "enabled": false
+            },
+            "previous-track": {
+               "enabled": true
+            },
+            "resume-track": {
+               "enabled": true
+            }
+         }
+      },
+      "@khasbilegt/store.raycast.1password": {
+         "preferences": {
+            "cliPath": "/usr/bin/op",
+            "closeWindowAfterCopying": true,
+            "primaryAction": "copy-username",
+            "reduceItemListMemoryUsage": false,
+            "secondaryAction": "copy-password",
+            "version": "v8",
+            "zshPath": "/bin/zsh"
+         },
+         "entrypoints": {
+            "generate-password": {
+               "enabled": false
+            }
+         }
+      },
+      "@mattisssa/store.raycast.spotify-player": {
+         "enabled": true,
+         "entrypoints": {
+            "cycleRepeat": {
+               "enabled": true
+            },
+            "devices": {
+               "enabled": false
+            },
+            "dislike": {
+               "enabled": true
+            },
+            "findLyrics": {
+               "enabled": false
+            },
+            "generatePlaylist": {
+               "enabled": false
+            },
+            "like": {
+               "enabled": true
+            },
+            "next": {
+               "enabled": false
+            },
+            "previous": {
+               "enabled": false
+            },
+            "search": {
+               "preferences": {
+                  "musicOnly": true,
+                  "topView": "artists"
+               }
+            },
+            "togglePlayPause": {
+               "enabled": false
+            },
+            "toggleShuffle": {
+               "enabled": true
+            }
+         }
+      },
+      "@sovereign/store.vicinae.awww-switcher": {
+         "preferences": {
+            "wallpaperPath": "/home/vitalii_v/Pictures/Wallpapers",
+            "colorGenTool": "matugen",
+            "gridRows": "4",
+            "postProduction": "no",
+            "showImageDetails": true,
+            "toggleVicinaeSetting": true,
+            "transitionDuration": "3",
+            "transitionFPS": "75",
+            "transitionStep": "90",
+            "transitionType": "random"
+         }
+      },
+      "applications": {
+         "entrypoints": {
+            "firewall-config": {
+               "enabled": false
+            },
+            "java-25-openjdk-jconsole": {
+               "enabled": false
+            },
+            "jetbrains-idea-d3a8762a-1a04-4407-bff8-d816f14dfad0": {
+               "enabled": true
+            },
+            "kdesystemsettings": {
+               "enabled": false
+            },
+            "opswatclient": {
+               "enabled": false
+            },
+            "org.freedesktop.GnomeAbrt": {
+               "enabled": false
+            },
+            "org.gnome.Devhelp": {
+               "enabled": false
+            },
+            "org.kde.drkonqi.coredump.gui": {
+               "enabled": false
+            },
+            "org.kde.kcharselect": {
+               "enabled": false
+            },
+            "org.kde.kdebugsettings": {
+               "enabled": false
+            },
+            "org.kde.kdeconnect.app": {
+               "enabled": false
+            },
+            "org.kde.kdeconnect.nonplasma": {
+               "enabled": false
+            },
+            "org.kde.kdeconnect.sms": {
+               "enabled": false
+            },
+            "org.kde.kjournaldbrowser": {
+               "enabled": false
+            },
+            "org.kde.kwrite": {
+               "enabled": true
+            },
+            "org.kde.plasma-systemmonitor": {
+               "enabled": false
+            },
+            "org.musescore.MuseScore": {
+               "enabled": false
+            },
+            "rofi": {
+               "enabled": false
+            },
+            "rofi-theme-selector": {
+               "enabled": false
+            },
+            "setroubleshoot": {
+               "enabled": false
+            },
+            "uuctl": {
+               "enabled": false
+            }
+         }
+      },
+      "browser-extension": {
+         "enabled": true
+      },
+      "core": {
+         "entrypoints": {
+            "about": {
+               "enabled": false
+            },
+            "documentation": {
+               "enabled": false
+            },
+            "keybind-settings": {
+               "enabled": false
+            },
+            "manage-fallback": {
+               "enabled": false
+            },
+            "oauth-token-store": {
+               "enabled": false
+            },
+            "open-config-file": {
+               "enabled": false
+            },
+            "open-default-config": {
+               "enabled": false
+            },
+            "prune-memory": {
+               "enabled": false
+            },
+            "refresh-apps": {
+               "enabled": true
+            },
+            "reload-scripts": {
+               "enabled": false
+            },
+            "report-bug": {
+               "enabled": false
+            },
+            "sponsor": {
+               "enabled": false
+            },
+            "store": {
+               "preferences": {
+                  "alwaysShowIntro": false
+               }
+            }
+         }
+      },
+      "developer": {
+         "entrypoints": {
+            "create": {
+               "enabled": false
+            }
+         }
+      },
+      "font": {
+         "entrypoints": {
+            "browse": {
+               "enabled": false
+            }
+         }
+      },
+      "power": {
+         "entrypoints": {
+            "hibernate": {
+               "enabled": false
+            },
+            "soft-reboot": {
+               "enabled": false
+            },
+            "suspend": {
+               "preferences": {
+                  "confirm": false
+               }
+            }
+         }
+      },
+      "system": {
+         "entrypoints": {
+            "volume-0": {
+               "enabled": false
+            },
+            "volume-100": {
+               "enabled": false
+            },
+            "volume-25": {
+               "enabled": false
+            },
+            "volume-50": {
+               "enabled": false
+            },
+            "volume-75": {
+               "enabled": false
+            }
+         }
+      }
+   }
+}

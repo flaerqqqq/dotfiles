@@ -1,0 +1,189 @@
+" Source your .vimrc
+source ~/.vimrc
+
+" General Settings
+set scrolloff=8                " Keep 5 lines above/below the cursor during scrolling
+set relativenumber             " Show relative line numbers
+set number                     " Show absolute line number for the current line
+set incsearch                  " Show matches while typing search query
+set ignorecase                 " Ignore case in search patterns
+set smartcase                  " Override ignorecase if search contains uppercase
+set hlsearch                   " Highlight search results
+set which-key                  " Display keybinding suggestions
+set surround                   " Use surround functionality
+let mapleader = " "            " Set leader key to space
+
+" Disable Ex mode
+nnoremap Q gq                  " Format text with Q
+inoremap ~~ \\                 " Map ~~ to literal backslash
+
+" Replace Esc with jk for easier reach
+inoremap jk <Esc>
+inoremap kj <Esc>
+
+" Plugin Configuration
+Plug 'machakann/vim-highlightedyank'   " Highlight text after yank
+Plug 'tpope/vim-commentary'            " Simplified commenting
+Plug 'tpope/vim-surround'              " Easy surround editing
+
+" Yank highlighting
+au TextYankPost * silent! lua vim.highlight.on_yank {higroup="IncSearch", timeout=200}
+
+" Stay in visual mode after indenting
+vnoremap < <gv
+vnoremap > >gv
+vnoremap = =gv
+
+" Tab navigation
+nnoremap [t :action PreviousTab<CR>
+nnoremap ]t :action NextTab<CR>
+
+" Pane navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <C-k> <C-w>k
+nnoremap <C-j> <C-w>j
+
+" Method navigation
+nnoremap [f :action MethodUp<CR>
+nnoremap ]f :action MethodDown<CR>
+
+" Error Navigation
+nnoremap [e :action GotoPreviousError<CR>
+nnoremap ]e :action GotoNextError<CR>
+
+" Enhancements
+set timeoutlen=500
+
+" Move selected lines up or down in Visual mode
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+
+" Append lines while keeping the cursor position
+nnoremap J mzJ`z
+
+" Search and center the found result
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Paste without overwriting the clipboard
+xnoremap <leader>p "_dP
+
+" Split window shortcuts
+nnoremap <leader>wh <C-W>s
+nnoremap <leader>ws <C-W>v
+
+" Quick quit
+nnoremap <C-q> :q<CR>
+
+" Delete without yanking
+nnoremap x "_x
+
+" Tab navigation
+nnoremap <Tab> :bnext<CR>
+nnoremap <S-Tab> :bprevious<CR>
+
+" Disable spacebar in Normal and Visual modes
+nnoremap <Space> <Nop>
+vnoremap <Space> <Nop>
+
+" Clear search highlights
+nnoremap <Esc> :noh<CR>
+
+" Save file shortcut
+nnoremap <C-s> :w<CR>
+
+" Stay in indent mode
+vnoremap < <gv
+vnoremap > >gv
+
+" Move text up or down in Visual mode
+vnoremap <A-j> :m .+1<CR>==
+vnoremap <A-k> :m .-2<CR>==
+
+nmap <leader><C-d> :action SetHarpoon1<cr>
+nmap <leader><C-f> :action SetHarpoon2<cr>
+nmap <leader><C-j> :action SetHarpoon3<cr>
+nmap <leader><C-k> :action SetHarpoon4<cr>
+
+nmap <leader>d :action GotoHarpoon1<cr>
+nmap <leader>f :action GotoHarpoon2<cr>
+nmap <leader>j :action GotoHarpoon3<cr>
+nmap <leader>k :action GotoHarpoon4<cr>
+
+nmap <leader>h :action ShowHarpoon<cr>
+nmap <leader>a :action AddToHarpoon<cr>
+
+nnoremap s :action AceAction<CR>
+" Keep last yanked text when pasting
+vnoremap p "_dP
+
+" Searching / navigation
+nnoremap <leader>q :action CloseContent<CR>
+nnoremap <leader>sf :action GotoFile<CR>
+nnoremap <leader>sc :action GotoClass<CR>
+nnoremap <leader>sg :action FindInPath<CR>
+nnoremap <leader>e :action RecentFiles<CR>
+nnoremap <leader>ss :action GotoSymbol<CR>
+
+"Refactorings
+nnoremap <leader>rr :action Replace<CR>
+nnoremap <leader>rl :action Inline<CR>
+nnoremap <leader>rf :action FormatCode<CR>
+nnoremap <leader>rs :action ChangeSignature<CR>
+nnoremap <leader>rt :action Refactorings.QuickListPopupAction<CR>
+nnoremap <leader>rn :action RenameElement<CR>
+nnoremap <leader>rep :action IntroduceParameter<CR>
+nnoremap <leader>rev :action IntroduceVariable<CR>
+nnoremap <leader>ref :action IntroduceField<CR>
+nnoremap <leader>rec :action IntroduceConstant<CR>
+nnoremap <leader>rem :action ExtractMethod<CR>
+nnoremap <leader>ri :action OrganizeImports<CR>
+nnoremap <leader>; :action EditorCompleteStatement<CR>
+
+" Refactorings for Visual Mode
+xnoremap <leader>rl :action Inline<CR>
+xnoremap <leader>rep :action IntroduceParameter<CR>
+xnoremap <leader>rev :action IntroduceVariable<CR>
+xnoremap <leader>ref :action IntroduceField<CR>
+xnoremap <leader>rec :action IntroduceConstant<CR>
+xnoremap <leader>rem :action ExtractMethod<CR>
+
+"Window management
+nnoremap <leader>wh :action HideAllWindows<CR>
+nnoremap <leader>ws :action SplitVertically<CR>
+nnoremap <leader>wv :action SplitHorizontally<CR>
+nnoremap <leader>wm :action MaximizeEditorInSplit<CR>
+nnoremap <leader>wr :action ReopenClosedTab<CR>
+nnoremap <leader>wx :action CloseAllEditor<CR>
+nnoremap <leader>wq :action Unsplit<CR>
+
+"Code related bindings
+nnoremap <leader>cd :action QuickJavaDoc<CR>
+nnoremap <leader>cg :action Generate<CR>
+xnoremap <leader>cg :action Generate<CR>
+nnoremap <leader>cmo :action OverrideMethods<CR>
+nnoremap <leader>cmi :action ImplementMethods<CR>
+nnoremap <leader>cs :action SurroundWith<CR>
+xnoremap <leader>cs :action SurroundWith<CR>
+nnoremap <leader>cl :action CommentByLineComment<CR>
+nnoremap <leader>cb :action CommentByBlockComment<CR>
+xnoremap <leader>cl :action CommentByLineComment<CR>
+xnoremap <leader>cb :action CommentByBlockComment<CR>
+nnoremap <leader>ci :action InspectCode<CR>
+nnoremap <leader>co :action OrganizeImports<CR>
+nnoremap <leader>ck :action SmartTypeCompletion<CR>
+
+"Undo history
+nnoremap <leader>u :action LocalHistory.ShowHistory<CR>
+
+"Go to navigation
+nnoremap <leader>gu :action ShowUsages<CR>
+nnoremap <leader>gd :action GotoDeclaration<CR>
+nnoremap <leader>gt :action GotoTest<CR>
+nnoremap <leader>gs :action GotoSuperMethod<CR>
+nnoremap <leader>gi :action GotoImplementation<CR>
+nnoremap <leader>gy :action GotoTypeDeclaration<CR>
+
+"File structure popup
+nnoremap <leader>m :action FileStructurePopup<CR>

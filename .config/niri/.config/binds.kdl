@@ -1,0 +1,101 @@
+// ~/.config/niri/config/binds.kdl
+
+binds {
+    // --- HELP & SESSION ---
+    Mod+Shift+Slash { show-hotkey-overlay; }
+    Mod+Alt+Q { quit; }
+
+    // --- WINDOW MISC ---
+    Mod+Q { close-window; }
+    Mod+Alt+Space { toggle-window-floating; }
+    Mod+P { pin-window; } // Equivalent to Hyprland's pin
+
+    // --- NAVIGATION (HJKL) ---
+    // Horizontal navigation scrolls the infinite ribbon
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    // Vertical navigation moves between windows in a stack (column)
+    Mod+K { focus-window-or-workspace-up; }
+    Mod+J { focus-window-or-workspace-down; }
+
+    // --- MOVE WINDOWS (Shift + HJKL) ---
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+L { move-column-right; }
+    Mod+Shift+K { move-window-up; }
+    Mod+Shift+J { move-window-down; }
+
+    // --- WINDOWS CYCLING & ALIGNMENT ---
+    Mod+Tab { focus-workspace-previous; } // Recent workspace toggle
+    Mod+Alt+H { align-column-left; }
+    Mod+Alt+L { align-column-right; }
+    Mod+Alt+C { align-column-center; }
+
+    // --- SIZE ADJUSTMENTS ---
+    Mod+Semicolon { set-column-width "-10%"; }
+    Mod+Apostrophe { set-column-width "+10%"; }
+    Mod+R { switch-preset-column-width; } // Cycles through widths (33%, 50%, 66%)
+
+    // --- FULLSCREEN LOGIC ---
+    Mod+D { maximize-column; }  // Full width but keeps Waybar visible
+    Mod+F { fullscreen-window; } // True total fullscreen
+
+    // --- COLUMN MANAGEMENT (The "Admit/Expel" logic) ---
+    // Combine window into a vertical stack or push it back to the ribbon
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+
+    // --- WORKSPACE NAVIGATION (Numbers) ---
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+7 { focus-workspace 5; }
+    Mod+8 { focus-workspace 6; }
+    Mod+9 { focus-workspace 7; }
+    Mod+0 { focus-workspace 8; }
+
+    // --- MOVE WINDOW TO WORKSPACE ---
+    Mod+Shift+1 { move-window-to-workspace 1; }
+    Mod+Shift+2 { move-window-to-workspace 2; }
+    Mod+Shift+3 { move-window-to-workspace 3; }
+    Mod+Shift+4 { move-window-to-workspace 4; }
+    Mod+Shift+7 { move-window-to-workspace 5; }
+    Mod+Shift+8 { move-window-to-workspace 6; }
+    Mod+Shift+9 { move-window-to-workspace 7; }
+    Mod+Shift+0 { move-window-to-workspace 8; }
+
+    // --- WORKSPACE SCROLLING (Ctrl+H/L) ---
+    Mod+Ctrl+H { focus-workspace-up; }
+    Mod+Ctrl+L { focus-workspace-down; }
+
+    // --- APPLICATIONS ---
+    Mod+Space { spawn "rofi" "-show" "drun" "-sorting-method" "fzf" "-sort" "-sidebar-mode"; }
+    Mod+Return { spawn "kitty"; }
+    Mod+W { spawn "/home/vitalii_v/.config/hypr/hyprland/scripts/launch_zen.sh"; }
+    Mod+E { spawn "kitty" "yazi"; }
+    Mod+Shift+E { spawn "kitty" "--class" "yazi-float" "yazi"; }
+    
+    // Using spawn-sh for complex shell pipes (Clipboard)
+    Mod+V { spawn-sh "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy"; }
+
+    // --- SYSTEM CONTROLS ---
+    XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
+    XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
+    XF86AudioMute        { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+
+    XF86MonBrightnessUp   { spawn "brightnessctl" "s" "5%+"; }
+    XF86MonBrightnessDown { spawn "brightnessctl" "s" "5%-"; }
+
+    // Media
+    XF86AudioNext  { spawn "playerctl" "next"; }
+    XF86AudioPause { spawn "playerctl" "play-pause"; }
+    XF86AudioPlay  { spawn "playerctl" "play-pause"; }
+    XF86AudioPrev  { spawn "playerctl" "previous"; }
+
+    // --- SCREENSHOTS ---
+    // Niri built-in interactive tool (much smoother)
+    Print { screenshot; }
+    Shift+Print { screenshot-screen; }
+    Ctrl+Print { screenshot-window; }
+}

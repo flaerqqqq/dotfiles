@@ -1,0 +1,11 @@
+
+[opener]
+extract = [
+	{ run = 'plugin ouch', desc = "Extract here with ouch" }
+]
+edit = [
+    { run = 'nvim "$@"', block = true, desc = "Edit", for = "unix" },
+]
+
+[keybindings]
+O = "xdg-open %f"

@@ -1,0 +1,136 @@
+// -*- mode: jsonc -*-
+{
+    "layer": "top",
+    "position": "top",
+    "height": 30,
+    "margin-top": 4,
+    "margin-left": 12,
+    "margin-right": 12,
+    "spacing": 0,
+
+    "modules-left": [],
+    "modules-center": [
+        "clock",
+        "hyprland/workspaces",
+        "mpris",
+        "pulseaudio",
+        "network",
+        "battery",
+        "bluetooth",
+        "hyprland/language",
+        "tray"
+    ],
+    "modules-right": [],
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 12,
+        "icons": {
+            "blueman": "bluetooth",
+            "TelegramDesktop": "$HOME/.local/share/icons/hicolor/16x16/apps/telegram.png"
+        }
+    },
+
+    // ── Clock ──────────────────────────────────────────────────────────────
+    "clock": {
+        "format": "{:%a  %H:%M}",
+        "format-alt": "{:%Y-%m-%d  %H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    // ── Workspaces ─────────────────────────────────────────────────────────
+    "hyprland/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": false,
+        "warp-on-scroll": true,
+        "format": "{name}",
+        "on-click": "activate",
+        "persistent-workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": []
+        }
+    },
+
+    "mpris": {
+        "format": "{player_icon} <span size='small'>{title}</span>",
+        "format-paused": "{status_icon} <span size='small' alpha='60%'>{title}</span>",
+        "player-icons": {
+            "default":  "󰎈",
+            "spotify":  "󰓇",
+            "firefox":  "󰈹",
+            "chromium": "󰊯",
+            "mpv":      "󰐍"
+        },
+        "status-icons": {
+            "paused": "󰏤"
+        },
+        "max-length": 24,
+        "on-click": "playerctl play-pause",
+        "on-click-right": "playerctl next",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
+        "tooltip-format": "{player}\n{title}\n{artist}\n{album}"
+    },
+
+    // ── Audio ──────────────────────────────────────────────────────────────
+    "pulseaudio": {
+        "format": "{icon} <span size='small'>{volume}%</span>",
+        "format-muted": "󰖁 <span size='small'>muted</span>",
+        "format-icons": {
+            "headphone": "󰋋",
+            "headset":   "󰋎",
+            "default":   ["󰕿", "󰖀", "󰕾"]
+        },
+        "scroll-step": 5,
+        "on-click": "pavucontrol",
+        "tooltip-format": "Volume: {volume}%"
+    },
+
+    // ── Network ────────────────────────────────────────────────────────────
+    "network": {
+        "format-wifi":         "󰤨 <span size='small'>{signalStrength}%</span>",
+        "format-ethernet":     "󰈀 <span size='small'>eth</span>",
+        "format-linked":       "󰤫",
+        "format-disconnected": "󰤭",
+        "tooltip-format-wifi":      "{essid}  {signalStrength}%\n{ipaddr}",
+        "tooltip-format-ethernet":  "{ifname}  {ipaddr}",
+        "tooltip-format-disconnected": "Disconnected",
+        "on-click": "nm-connection-editor"
+    },
+
+    // ── Battery ────────────────────────────────────────────────────────────
+    "battery": {
+        "states": {
+            "good":     80,
+            "warning":  30,
+            "critical": 15
+        },
+        "format":          "{icon} <span size='small'>{capacity}%</span>",
+        "format-charging": "󰂄 <span size='small'>{capacity}%</span>",
+        "format-plugged":  "󰚥",
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "tooltip-format": "{capacity}% — {time} remaining",
+        "on-click": "walker -m menus:battery"
+    },
+
+    // ── Bluetooth ──────────────────────────────────────────────────────────
+    "bluetooth": {
+        // only show device name when something is connected
+        "format":           "",
+        "format-connected": "󰂯 <span size='small'>{device_alias}</span>",
+        "format-connected-battery": "󰂯 <span size='small'>{device_alias} | {device_battery_percentage}%</span>",
+        "tooltip-format":           "Bluetooth\n{controller_alias}",
+        "tooltip-format-connected": "󰂯 {device_enumerate}",
+        "tooltip-format-enumerate-connected": "  {device_alias}",
+        "on-click": "blueman-manager"
+    },
+
+    // ── Keyboard language ──────────────────────────────────────────────────
+    "hyprland/language": {
+        "format": "󰌌 <span size='medium'>{short}</span>",
+        "tooltip-format": "{long}"
+    }
+}
