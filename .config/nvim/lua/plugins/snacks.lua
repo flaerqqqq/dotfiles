@@ -1,8 +1,11 @@
 return {
     "folke/snacks.nvim",
-    priority = 1000,
-    lazy = false,
     opts = {
-        explorer = { enabled = false, replace_netrw = false },
+        explorer = { enabled = false },
+    },
+    keys = {
+        -- Disable the Snacks explorer keymaps
+        { "<leader>e", false },
+        { "<leader>E", false },
     },
 }
