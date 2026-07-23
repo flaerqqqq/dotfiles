@@ -1,3 +1,36 @@
--- Options are automatically loaded before lazy.nvim startup
--- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
--- Add any additional options here
+vim.opt.diffopt = "iwhiteall,internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:patience"
+
+-- Indentation & Tab Defaults
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = 4
+vim.opt.expandtab = true
+
+-- Whitespace & Indent Character Display
+vim.opt.list = true
+vim.opt.listchars:append({
+    tab = "  ",
+    trail = "·",
+    nbsp = "&",
+})
+
+if os.getenv("SSH_TTY") ~= nil then
+    local function my_paste(_reg)
+        return function(_lines)
+            local content = vim.fn.getreg('"')
+            return vim.split(content, "\n")
+        end
+    end
+
+    vim.g.clipboard = {
+        name = "OSC 52",
+        copy = {
+            ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+            ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+        },
+        paste = {
+            ["+"] = my_paste("+"),
+            ["*"] = my_paste("*"),
+        },
+    }
+end
