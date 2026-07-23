@@ -1,0 +1,5 @@
+{{PACKAGE}}
+
+public enum {{NAME}} {
+
+}
