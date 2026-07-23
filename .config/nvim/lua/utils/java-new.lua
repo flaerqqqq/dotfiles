@@ -29,13 +29,36 @@ local function create_java_file(dir)
             return
         end
 
-        vim.ui.input({ prompt = "Name: " }, function(name)
-            if not name or name == "" then
+        vim.ui.input({ prompt = "Name: " }, function(input)
+            if not input or input == "" then
                 return
             end
 
-            local pkg = java_package_from_path(dir)
-            local pkg_line = pkg and ("package " .. pkg .. ";") or ""
+            -- Clean input and parse dot notation (e.g., "dto.request.UserDto")
+            input = input:gsub("%.java$", "")
+            local parts = {}
+            for part in string.gmatch(input, "[^.]+") do
+                table.insert(parts, part)
+            end
+
+            local name = table.remove(parts) -- Last part is class name
+            local extra_pkg = table.concat(parts, ".") -- Remaining parts form sub-packages
+            local target_dir = dir
+
+            -- Append subdirectories to the physical directory path
+            if #parts > 0 then
+                target_dir = target_dir .. "/" .. table.concat(parts, "/")
+                vim.fn.mkdir(target_dir, "p") -- Create nested dirs if they don't exist
+            end
+
+            -- Build the final package statement
+            local base_pkg = java_package_from_path(dir)
+            local full_pkg = base_pkg
+            if extra_pkg ~= "" then
+                full_pkg = base_pkg and (base_pkg .. "." .. extra_pkg) or extra_pkg
+            end
+
+            local pkg_line = full_pkg and ("package " .. full_pkg .. ";") or ""
 
             local tpl_path = TEMPLATES_DIR .. choice.file
             local lines = vim.fn.readfile(tpl_path)
@@ -46,7 +69,7 @@ local function create_java_file(dir)
                 lines[i] = line
             end
 
-            local filepath = dir .. "/" .. name .. ".java"
+            local filepath = target_dir .. "/" .. name .. ".java"
             vim.fn.writefile(lines, filepath)
             vim.cmd("edit " .. vim.fn.fnameescape(filepath))
 
