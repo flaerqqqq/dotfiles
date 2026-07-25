@@ -34,6 +34,7 @@ return {
                 "vim",
                 "vimdoc",
                 "yaml",
+                "xml",
             }
 
             -- Asynchronously install missing parsers on startup

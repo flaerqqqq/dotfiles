@@ -64,5 +64,12 @@ alias gl="git pull"
 alias d="docker"
 alias dc="docker compose"
 
+t() {
+  local session_name="${1:-$(basename "$PWD")}"
+  tmux new-session -s "$session_name" -c "$PWD"
+}
+
+alias ta='tmux attach || tmux new-session -c "$PWD"'
+
 export LESS='-R'
 export MANPAGER='less -R'

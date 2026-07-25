@@ -6,9 +6,9 @@ return {
 
         opts = {
             indent = {
-                char = "│",
-                tab_char = "│",
-                highlight = "LineNr",
+                char = "▏",
+                tab_char = "▏",
+                highlight = { "LineNr" },
             },
 
             whitespace = {
@@ -16,7 +16,10 @@ return {
             },
 
             scope = {
-                enabled = false,
+                enabled = true,
+                show_start = false,
+                show_end = false,
+                highlight = { "Whitespace" },
             },
 
             exclude = {

@@ -37,5 +37,6 @@ return {
                 light = "lotus",
             },
         })
+        vim.cmd.colorscheme("kanagawa")
     end,
 }
