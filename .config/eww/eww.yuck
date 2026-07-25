@@ -1,7 +1,17 @@
-;; Define a separate variable for each monitor's ID
-(defvar windows_0 "[]")
-(defvar windows_1 "[]")
-;; Add (defvar windows_2 "[]") etc., if you have more than 2 monitors
+;; ==========================================
+;; VARIABLES
+;; ==========================================
+
+;; Laptop monitor
+(defvar windows_eDP-1 "[]")
+
+;; External monitor
+(defvar windows_HDMI-A-1 "[]")
+
+
+;; ==========================================
+;; WIDGETS
+;; ==========================================
 
 (defwidget tab [w]
   (button :class {w.active ? "tab active" : "tab"}
@@ -23,7 +33,7 @@
              :ellipsize "end"
              :single-line true))))
 
-;; Updated to accept a 'tabs' parameter
+
 (defwidget tabbar [tabs]
   (box :class "tabbar"
        :orientation "h"
@@ -34,11 +44,14 @@
     (for w in tabs
       (tab :w w))))
 
-;; --- WINDOWS FOR EACH MONITOR ---
 
-;; Monitor 0 (Usually your main monitor)
-(defwindow tabbar_0
-  :monitor 0
+;; ==========================================
+;; WINDOW DEFINITIONS
+;; ==========================================
+
+;; 1. Laptop Monitor (eDP-1)
+(defwindow tabbar_eDP-1
+  :monitor "eDP-1"
   :windowtype "dock"
   :exclusive true
   :stacking "fg"
@@ -48,11 +61,12 @@
               :width "100%"
               :height "30px"
               :anchor "bottom center")
-  (tabbar :tabs windows_0))
+  (tabbar :tabs windows_eDP-1))
 
-;; Monitor 1 (Usually your secondary monitor)
-(defwindow tabbar_1
-  :monitor 1
+
+;; 2. External Monitor (HDMI-A-1)
+(defwindow tabbar_HDMI-A-1
+  :monitor "HDMI-A-1"
   :windowtype "dock"
   :exclusive true
   :stacking "fg"
@@ -62,4 +76,4 @@
               :width "100%"
               :height "30px"
               :anchor "bottom center")
-  (tabbar :tabs windows_1))
+  (tabbar :tabs windows_HDMI-A-1))

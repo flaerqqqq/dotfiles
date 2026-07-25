@@ -56,7 +56,7 @@ return {
                 -- Right Side
                 lualine_y = {},
                 lualine_z = {
-                    { "location", icon = "" },
+                    { "location", icon = "" },
                 },
             },
             inactive_sections = {
