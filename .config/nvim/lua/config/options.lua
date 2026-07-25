@@ -34,3 +34,14 @@ if os.getenv("SSH_TTY") ~= nil then
         },
     }
 end
+vim.opt.fillchars:append({
+    vert = "▏", -- Left 1/8th block
+
+    horiz = "—", -- Bottom-aligned 1/8th block (Uncomment this one if you prefer it lower)
+
+    verthoriz = "—",
+    horizup = "—",
+    horizdown = "—",
+    vertleft = "▏",
+    vertright = "▏",
+})

@@ -1,109 +1,76 @@
 return {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    event = "VeryLazy",
-    opts = function()
-        local icons = {
-            diagnostics = { error = " ", warn = " ", info = " ", hint = "󰌵 " },
-            git = { added = "✚", modified = "", removed = "✖" },
-        }
+    config = function()
+        local success, theme = pcall(require, "lualine.themes.kanagawa")
 
-        -- pull a color from the active colorscheme's highlight groups,
-        -- so this adapts automatically instead of being hardcoded
-        local function hl_fg(group, fallback)
-            local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
-            if ok and hl and hl.fg then
-                return string.format("#%06x", hl.fg)
+        if success then
+            -- 1. Grab the exact colors Normal mode uses for the Git/Filename section
+            local b_bg = theme.normal.b.bg
+            local b_fg = theme.normal.b.fg
+
+            local modes = { "normal", "insert", "visual", "command", "replace", "inactive" }
+            for _, mode in ipairs(modes) do
+                if theme[mode] then
+                    -- 2. Keep the middle section transparent
+                    if theme[mode].c then
+                        theme[mode].c.bg = "NONE"
+                    end
+
+                    -- 3. Force the Git/Filename section (b) to stay solid across ALL modes
+                    if theme[mode].b then
+                        theme[mode].b.bg = b_bg
+                        if not theme[mode].b.fg then
+                            theme[mode].b.fg = b_fg
+                        end
+                    else
+                        theme[mode].b = { bg = b_bg, fg = b_fg }
+                    end
+                end
             end
-            return fallback
+        else
+            theme = "auto"
         end
 
-        local function macro_recording()
-            local reg = vim.fn.reg_recording()
-            if reg == "" then
-                return ""
-            end
-            return "󰑋 @" .. reg
-        end
-
-        local function search_count()
-            if vim.v.hlsearch == 0 then
-                return ""
-            end
-            local ok, result = pcall(vim.fn.searchcount, { maxcount = 999 })
-            if not ok or result.total == 0 then
-                return ""
-            end
-            return string.format(" %d/%d", result.current, result.total)
-        end
-
-        local function lsp_clients()
-            local clients = vim.lsp.get_clients({ bufnr = 0 })
-            if #clients == 0 then
-                return ""
-            end
-            local names = {}
-            for _, c in ipairs(clients) do
-                table.insert(names, c.name)
-            end
-            return " " .. table.concat(names, ", ")
-        end
-
-        return {
+        require("lualine").setup({
             options = {
-                theme = "auto",
-                globalstatus = true,
+                theme = theme,
+                section_separators = { left = "", right = "" },
                 component_separators = { left = "", right = "" },
-                section_separators = { left = "", right = "" },
-                disabled_filetypes = { statusline = { "dashboard", "alpha", "starter" } },
+                globalstatus = true,
             },
             sections = {
-                lualine_a = { "mode" },
+                -- Left Side
+                lualine_a = {
+                    { "mode", icon = "" },
+                },
                 lualine_b = {
-                    { "branch", icon = "" },
-                    { "diff", symbols = icons.git, colored = true },
+                    { "filename", path = 0 },
+                    { "branch", icon = "" },
                 },
-                lualine_c = {
-                    { "filename", path = 1, symbols = { modified = "  ●", readonly = "  " } },
-                    {
-                        macro_recording,
-                        color = function()
-                            return { fg = hl_fg("DiagnosticWarn", "#e0af68"), gui = "bold" }
-                        end,
-                    },
+
+                -- Middle
+                lualine_c = {},
+                lualine_x = {},
+
+                -- Right Side
+                lualine_y = {},
+                lualine_z = {
+                    { "location", icon = "" },
                 },
-                lualine_x = {
-                    {
-                        "diagnostics",
-                        symbols = {
-                            error = icons.diagnostics.error,
-                            warn = icons.diagnostics.warn,
-                            info = icons.diagnostics.info,
-                            hint = icons.diagnostics.hint,
-                        },
-                    },
-                    {
-                        lsp_clients,
-                        color = function()
-                            return { fg = hl_fg("Function", "#7aa2f7") }
-                        end,
-                    },
-                    {
-                        search_count,
-                        color = function()
-                            return { fg = hl_fg("Statement", "#bb9af7") }
-                        end,
-                    },
-                    "filetype",
-                },
-                lualine_y = { "progress" },
-                lualine_z = { "location" },
             },
             inactive_sections = {
-                lualine_c = { "filename" },
-                lualine_x = { "location" },
+                lualine_a = {},
+                lualine_b = {},
+                lualine_c = { { "filename", path = 0 } },
+                lualine_x = {},
+                lualine_y = {},
+                lualine_z = {},
             },
-            extensions = { "neo-tree", "lazy", "trouble", "quickfix" },
-        }
+        })
+
+        -- Wipes leftover black/dark background from the empty spaces
+        vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
+        vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE" })
     end,
 }
