@@ -56,31 +56,6 @@ return {
         end,
     },
 
-    -- Sticky header context bar
-    {
-        "nvim-treesitter/nvim-treesitter-context",
-        event = { "BufReadPost", "BufNewFile" },
-        opts = {
-            enable = true,
-            max_lines = 3,
-            trim_scope = "outer",
-            mode = "cursor",
-        },
-        config = function(_, opts)
-            require("treesitter-context").setup(opts)
-
-            -- Fold configuration for targeted filetypes
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = { "java", "devtools-detail", "json" },
-                callback = function()
-                    vim.wo[0].foldmethod = "expr"
-                    vim.wo[0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
-                    vim.wo[0].foldenable = false -- Keeps folds open on buffer enter
-                end,
-            })
-        end,
-    },
-
     -- =========================================================================
     -- 2. TREESITTER TEXTOBJECTS & EXTENSIONS
     -- =========================================================================
