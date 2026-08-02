@@ -45,3 +45,5 @@ vim.opt.fillchars:append({
     vertleft = "▏",
     vertright = "▏",
 })
+vim.opt.swapfile = false -- Disable swap files (modern setups rarely need them)
+vim.opt.undofile = true

@@ -72,8 +72,22 @@ return {
     },
 
     keys = {
+        {
+            "<leader>fj",
+            function()
+                require("utils.java_search").open_picker()
+            end,
+            desc = "Java Dependencies (IntelliJ Style)",
+        },
         { "<leader>e", false },
         { "<leader>E", false },
+        {
+            "<leader>fs",
+            function()
+                Snacks.picker.lsp_symbols()
+            end,
+            desc = "Search File Structure",
+        },
         {
             "<leader>ff",
             function()

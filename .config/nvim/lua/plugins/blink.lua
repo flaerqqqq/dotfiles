@@ -36,10 +36,12 @@ return {
             max_typos = function()
                 return 1
             end,
-            use_proximity = false,
+            use_proximity = true,
         },
 
         appearance = {
+            -- Added this to ensure colorschemes can fallback to standard cmp highlights
+            use_nvim_cmp_as_default = true,
             nerd_font_variant = "mono",
         },
 
@@ -90,6 +92,32 @@ return {
                                 fill = true,
                                 max = 45,
                             },
+                            -- Added text and highlight functions to process fuzzy matched characters
+                            text = function(ctx)
+                                return ctx.label .. (ctx.label_detail or "")
+                            end,
+                            highlight = function(ctx)
+                                local highlights = {
+                                    {
+                                        0,
+                                        #ctx.label,
+                                        group = ctx.deprecated and "BlinkCmpLabelDeprecated" or "BlinkCmpLabel",
+                                    },
+                                }
+                                if ctx.label_detail then
+                                    table.insert(
+                                        highlights,
+                                        { #ctx.label, #ctx.label + #ctx.label_detail, group = "BlinkCmpLabelDetail" }
+                                    )
+                                end
+
+                                -- Applies the highlight to matched characters
+                                for _, idx in ipairs(ctx.label_matched_indices or {}) do
+                                    table.insert(highlights, { idx, idx + 1, group = "BlinkCmpLabelMatch" })
+                                end
+
+                                return highlights
+                            end,
                         },
                         label_description = {
                             width = {
