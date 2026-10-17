@@ -8,18 +8,9 @@
 hl.window_rule({
 	name = "vicinae",
 	match = { class = "vicinae" },
-	rounding = 20,
-	rounding_power = 4,
 	float = true,
 	pin = true,
 	allows_input = true,
 	stay_focused = true,
 	opacity = 0.95,
 })
-
--- Opacity rules
-hl.window_rule({ match = { class = "code" }, opacity = 0.90 })
-hl.window_rule({ match = { class = "org.gnome.Nautilus" }, opacity = 0.90 })
-hl.window_rule({ match = { class = "spotify" }, opacity = 0.80 })
-hl.window_rule({ match = { class = "org.telegram.desktop" }, opacity = 0.80 })
-hl.window_rule({ match = { class = "Postman" }, opacity = 0.90 })

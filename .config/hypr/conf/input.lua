@@ -1,5 +1,3 @@
--- ~/.config/hypr/conf/input.lua
-
 -- ========== GESTURES (1:1 trackpad gestures) ==========
 -- This is the newer per-gesture system (hl.gesture), separate from the
 -- gestures{} gesture category below (workspace-swipe tuning).

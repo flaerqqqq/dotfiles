@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+
+YAZI_MODE=false
+target=""
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-sessionizer"
+HIST_FILE="$CACHE_DIR/history"
+
+# --- Help Menu ---
+print_help() {
+    cat <<EOF
+Usage: tmux-sessionizer [DIRECTORY] [OPTIONS]
+
+An environment-agnostic tmux workspace launcher with automatic project history tracking, 
+IntelliJ IDEA integration, and a standardized 5-window layout (Code, Terminal, AI, Server, Docker).
+
+Arguments:
+  DIRECTORY            Path to a project directory to open. If omitted, opens 
+                       your recent project history via fzf (or current directory).
+
+Options:
+  -y, --yazi           Open the Yazi file manager to interactively select a directory.
+  --clean              Clear the recent project history cache.
+  -h, --help           Display this help message and exit.
+
+Examples:
+  tmux-sessionizer                  # Pick from recent project history
+  tmux-sessionizer ./my-app         # Open a specific path directly
+  tmux-sessionizer -y               # Open Yazi to select a directory
+  tmux-sessionizer --clean          # Clear the history cache
+EOF
+    exit 0
+}
+
+# --- History Management Function ---
+add_to_history() {
+    local dir="$1"
+    mkdir -p "$CACHE_DIR"
+
+    # Remove existing entry if present to avoid duplicates
+    if [[ -f "$HIST_FILE" ]]; then
+        grep -vxF "$dir" "$HIST_FILE" >"${HIST_FILE}.tmp" 2>/dev/null || true
+        mv "${HIST_FILE}.tmp" "$HIST_FILE"
+    fi
+
+    # Prepend the new path to the top of the history file
+    (
+        echo "$dir"
+        cat "$HIST_FILE" 2>/dev/null
+    ) >"${HIST_FILE}.tmp"
+    mv "${HIST_FILE}.tmp" "$HIST_FILE"
+}
+
+# --- Parse arguments ---
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h | --help)
+        print_help
+        ;;
+    --clean)
+        if [[ -f "$HIST_FILE" ]]; then
+            rm -f "$HIST_FILE"
+            echo "Project history cache cleared successfully."
+        else
+            echo "No history cache found."
+        fi
+        exit 0
+        ;;
+    -y | --yazi)
+        YAZI_MODE=true
+        shift
+        ;;
+    -*)
+        echo "Unknown option: $1" >&2
+        echo "Run 'tmux-sessionizer --help' for usage." >&2
+        exit 1
+        ;;
+    *)
+        target="$1"
+        shift
+        ;;
+    esac
+done
+
+# --- Determine target directory ---
+if [[ "$YAZI_MODE" == "true" ]]; then
+    tmp="$(mktemp -t "yazi-sessionizer.XXXXXX")"
+    yazi --cwd-file="$tmp"
+
+    target=""
+    if [[ -f "$tmp" ]]; then
+        target="$(cat -- "$tmp")"
+        rm -f -- "$tmp"
+    fi
+
+    if [[ -z "$target" ]]; then
+        echo "Cancelled."
+        exit 0
+    fi
+elif [[ -z "$target" ]]; then
+    # No arguments provided -> Open fzf history picker if history exists
+    if [[ -f "$HIST_FILE" ]] && command -v fzf &>/dev/null; then
+        target=$(fzf <"$HIST_FILE" --prompt="Recent Projects > ")
+        if [[ -z "$target" ]]; then
+            echo "Cancelled."
+            exit 0
+        fi
+    else
+        # Fallback to current directory if no history yet
+        target="$PWD"
+    fi
+fi
+
+if [[ -n "$target" ]]; then
+    if [[ -d "$target" ]]; then
+        selected="$(cd "$target" && pwd)"
+        add_to_history "$selected"
+    else
+        echo "Error: Directory '$target' not found." >&2
+        exit 1
+    fi
+else
+    selected="$PWD"
+    add_to_history "$selected"
+fi
+
+# --- Prepare names and variables ---
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+# --- Handle IntelliJ IDEA opening ---
+if [[ -d "$selected/.idea" ]]; then
+    setsid idea "$selected" >/dev/null 2>&1 &
+    sleep 0.2
+fi
+
+# --- Tmux Session Logic ---
+# Case A: If we aren't in tmux and it's not even running, start fresh and attach
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    tmux new-session -s "$selected_name" -c "$selected" -n "Code" -d
+    tmux new-window -t "$selected_name":2 -n "Terminal" -c "$selected"
+    tmux new-window -t "$selected_name":3 -n "AI" -c "$selected"
+    tmux new-window -t "$selected_name":4 -n "Server" -c "$selected"
+    tmux new-window -t "$selected_name":5 -n "Docker" -c "$selected"
+
+    tmux select-window -t "$selected_name":1
+    tmux attach-session -t "$selected_name"
+    exit 0
+fi
+
+# Case B: Create the session in the background if it doesn't exist yet
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected" -n "Code"
+    tmux new-window -t "$selected_name":2 -n "Terminal" -c "$selected"
+    tmux new-window -t "$selected_name":3 -n "AI" -c "$selected"
+    tmux new-window -t "$selected_name":4 -n "Server" -c "$selected"
+    tmux new-window -t "$selected_name":5 -n "Docker" -c "$selected"
+
+    tmux select-window -t "$selected_name":1
+fi
+
+# Case C: Switch or Attach
+if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$selected_name"
+else
+    tmux switch-client -t "$selected_name"
+fi

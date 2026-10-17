@@ -1,5 +1,3 @@
--- ~/.config/hypr/conf/keybinds.lua
-
 local terminal = "kitty"
 local fileManager = "kitty -e yazi"
 local browser = "google-chrome"
@@ -16,11 +14,6 @@ local SUPER_CTRL = "SUPER + CTRL"
 local SUPER_CTRL_SHIFT = "SUPER + CTRL + SHIFT"
 local SUPER_CTRL_ALT = "SUPER + CTRL + ALT"
 
--- Old hyprland.conf had `submap = global` sitting above this entire file with
--- no matching `submap = reset`, meaning every one of these binds lived inside
--- a submap called "global" that hyprland.conf force-activated on startup.
--- hl.define_submap() reproduces that scope; hyprland.lua's
--- hl.on("hyprland.start", ...) hook activates it.
 hl.define_submap("global", function()
 	-- ========== WORKSPACES ==========
 	-- Navigation between workspaces

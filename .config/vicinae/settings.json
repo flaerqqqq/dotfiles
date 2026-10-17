@@ -23,7 +23,7 @@
    },
    "theme": {
       "dark": {
-         "name": "zenwritten-dark",
+         "name": "catppuccin-latte",
          "icon_theme": "MacTahoe-dark"
       }
    },
@@ -31,7 +31,7 @@
       "system_info": false
    },
    "launcher_window": {
-      "rounding": 16,
+      "rounding": 0,
       "opacity": 0.6,
       "client_side_decorations": {
          "enabled": true,

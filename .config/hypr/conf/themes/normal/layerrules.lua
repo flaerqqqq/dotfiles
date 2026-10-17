@@ -4,7 +4,7 @@
 hl.layer_rule({
 	match = { namespace = "waybar" },
 	blur = true,
-	ignore_alpha = 0.2,
+	ignore_alpha = 0.5,
 })
 
 -- rofi
@@ -25,6 +25,12 @@ hl.layer_rule({
 -- vicinae
 hl.layer_rule({
 	match = { namespace = "vicinae" },
+	blur = true,
+	ignore_alpha = 0.2,
+})
+
+hl.layer_rule({
+	match = { namespace = "(?i).*noctalia.*" },
 	blur = true,
 	ignore_alpha = 0.2,
 })

@@ -1,11 +1,3 @@
--- ~/.config/hypr/conf/themes/normal/windowrules.lua
-
--- Multiple old lines targeting the SAME selector (e.g. "center on" then
--- "float on" for the same title regex) are merged into one hl.window_rule()
--- call each, since that's the documented shape (one match table + as many
--- effect fields as you want per call), rather than issuing N calls for the
--- same selector.
-
 -- ========== Floating: file dialogs ==========
 hl.window_rule({ match = { title = "^(Open File)(.*)$" }, center = true, float = true })
 hl.window_rule({ match = { title = "^(Select a File)(.*)$" }, center = true, float = true })
@@ -87,10 +79,6 @@ hl.window_rule({ match = { title = ".*minecraft.*" }, immediate = true })
 hl.window_rule({ match = { class = "^(steam_app).*" }, immediate = true })
 
 -- ========== Fix JetBrains IDEs focus/rerendering problem ==========
--- NOTE: original combined three match props on one line: match:class,
--- match:float (a boolean PROP, matches windows already floating — not an
--- effect), and match:title against an empty/whitespace/"winNNN" title.
--- All three go in the same `match` table since all props must match together.
 hl.window_rule({
 	match = {
 		class = "^jetbrains-.*$",

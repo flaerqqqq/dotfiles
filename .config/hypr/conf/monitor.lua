@@ -1,5 +1,3 @@
--- ~/.config/hypr/conf/monitor.lua
-
 -- External monitor (primary)
 hl.monitor({
 	output = "HDMI-A-1",
@@ -16,12 +14,6 @@ hl.monitor({
 	scale = 1,
 })
 
--- Run once when Hyprland finishes loading, same as the old top-level `exec =`
--- line. hl.on("hyprland.start", ...) is the documented replacement — using
--- plain hl.exec_cmd() at file scope would fire on every config reload too,
--- not just on startup, which `exec` (as opposed to `exec-once`) in old
--- hyprlang actually did NOT do — so this is a slight behavior tightening,
--- worth knowing about if you relied on it re-running on every save.
 hl.on("hyprland.start", function()
 	hl.exec_cmd('bash -c "~/.config/hypr/conf/scripts/lid_monitor.sh"')
 end)

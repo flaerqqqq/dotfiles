@@ -2,11 +2,11 @@
 
 hl.config({
 	general = {
-		gaps_in = 3,
-		gaps_out = 4,
+		gaps_in = 2,
+		gaps_out = 2,
 		border_size = 1,
-		["col.active_border"] = "rgba(3a3a3aaa)",
-		["col.inactive_border"] = "rgba(2a2a2aaa)",
+		["col.active_border"] = "rgba(3a3a3acc)",
+		["col.inactive_border"] = "rgba(2a2a2acc)",
 		resize_on_border = true,
 		no_focus_fallback = true,
 		allow_tearing = false,
