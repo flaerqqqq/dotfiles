@@ -1,5 +1,7 @@
 vim.opt.diffopt = "iwhiteall,internal,filler,closeoff,indent-heuristic,linematch:60,algorithm:patience"
 
+vim.g.autoformat = false
+
 -- Indentation & Tab Defaults
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4

@@ -51,7 +51,6 @@ return {
 
             -- Register filetype fallbacks for parsers
             vim.treesitter.language.register("bash", "zsh")
-            vim.treesitter.language.register("yaml", "github-actions")
             vim.treesitter.language.register("markdown", "devtools-detail")
         end,
     },

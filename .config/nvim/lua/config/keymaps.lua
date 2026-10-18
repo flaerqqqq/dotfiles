@@ -9,6 +9,8 @@ local keys = {
     "<leader>gL",
     "<leader>gp",
     "<leader>gP",
+    "<leader>gI",
+    "<leader>gY",
     "<leader>gs",
     "<leader>gS",
     "<leader>gy",
