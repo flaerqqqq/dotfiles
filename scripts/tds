@@ -1,0 +1,326 @@
+#!/usr/bin/env bash
+
+# --- Upfront Dependency Validation ---
+for cmd in tmux jq; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: Required tool '$cmd' is not installed." >&2
+        exit 1
+    fi
+done
+
+# ==============================================================================
+# CONFIGURATION MANAGEMENT (JSON & PROFILES)
+# ==============================================================================
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/tds"
+CONFIG_FILE="$CONFIG_DIR/config.json"
+PROFILES_DIR="$CONFIG_DIR/profiles"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tds"
+HIST_FILE="$CACHE_DIR/history"
+
+# Auto-create config directory and config.json if they don't exist
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    mkdir -p "$CONFIG_DIR" "$PROFILES_DIR"
+    cat <<EOF >"$CONFIG_FILE"
+{
+  "search_paths": [
+    "~/projects"
+  ]
+}
+EOF
+fi
+
+# Ensure profiles directory exists
+mkdir -p "$PROFILES_DIR"
+
+# Load SEARCH_PATHS dynamically from config.json
+SEARCH_PATHS=()
+while IFS= read -r path; do
+    [[ -z "$path" ]] && continue
+    # Expand tilde (~) and environment variables safely
+    eval path="$path"
+    SEARCH_PATHS+=("$path")
+done < <(jq -r '.search_paths[]? // empty' "$CONFIG_FILE" 2>/dev/null)
+
+YAZI_MODE=false
+FIND_MODE=false
+HIST_MODE=false
+EDITOR_CMD=""
+profile_name=""
+PROFILE_EXPLICITLY_SET=false
+target=""
+
+# --- Help Menu ---
+print_help() {
+    cat <<EOF
+Usage: tds [DIRECTORY] [OPTIONS]
+
+A project-focused development workspace launcher with automatic history tracking, 
+extensible editor integration, and modular window layout profiles.
+
+Configuration:
+  JSON Config File:   $CONFIG_FILE
+  Profiles Directory: $PROFILES_DIR
+
+Arguments:
+  DIRECTORY             Path to a specific project directory to open. 
+                        If omitted, opens the current directory by default.
+
+Selection Options:
+  -H, --history         Open fzf to pick from recent project history.
+  -f, --find            Deterministically scan search paths and submodules using fzf.
+  -y, --yazi            Open the Yazi file manager to interactively select a directory.
+
+Workspace Options:
+  -p, --profile <name>  Use a specific window layout profile (optional)
+
+Editor Options:
+  -c, --code            Open project with standalone VS Code ('code')
+  -i, --idea            Open project with IntelliJ IDEA ('idea')
+  -e, --editor <cmd>    Open project with any custom editor/tool command
+
+Utility Options:
+  --clean               Clear the recent project history cache.
+  -h, --help            Display this help message and exit.
+
+Examples:
+  tds                   # Open current directory with fallback 1-window layout
+  tds -f -p backend     # Select project via fzf and apply 'backend' profile explicitly
+  tds ./my-app          # Open specific path with fallback 1-window layout
+  tds -H                # Pick a project from recent history via fzf
+  tds --clean           # Clear the history cache
+EOF
+    exit 0
+}
+
+# --- History Management Function (with 50-entry cap) ---
+add_to_history() {
+    local dir="$1"
+    mkdir -p "$CACHE_DIR"
+
+    # Remove existing entry if present to avoid duplicates
+    if [[ -f "$HIST_FILE" ]]; then
+        grep -vxF "$dir" "$HIST_FILE" >"${HIST_FILE}.tmp" 2>/dev/null || true
+        mv "${HIST_FILE}.tmp" "$HIST_FILE"
+    fi
+
+    # Prepend the new path to the top of the history file
+    (
+        echo "$dir"
+        cat "$HIST_FILE" 2>/dev/null
+    ) >"${HIST_FILE}.tmp"
+    mv "${HIST_FILE}.tmp" "$HIST_FILE"
+
+    # Cap history file to a maximum of 50 entries
+    if [[ -f "$HIST_FILE" ]]; then
+        head -n 50 "$HIST_FILE" >"${HIST_FILE}.tmp"
+        mv "${HIST_FILE}.tmp" "$HIST_FILE"
+    fi
+}
+
+# --- Parse arguments ---
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h | --help)
+        print_help
+        ;;
+    --clean)
+        if [[ -f "$HIST_FILE" ]]; then
+            rm -f "$HIST_FILE"
+            echo "Project history cache cleared successfully."
+        else
+            echo "No history cache found."
+        fi
+        exit 0
+        ;;
+    -H | --history)
+        HIST_MODE=true
+        shift
+        ;;
+    -f | --find)
+        FIND_MODE=true
+        shift
+        ;;
+    -y | --yazi)
+        YAZI_MODE=true
+        shift
+        ;;
+    -p | --profile)
+        profile_name="$2"
+        PROFILE_EXPLICITLY_SET=true
+        shift 2
+        ;;
+    -c | --code)
+        EDITOR_CMD="code"
+        shift
+        ;;
+    -i | --idea)
+        EDITOR_CMD="idea"
+        shift
+        ;;
+    -e | --editor)
+        EDITOR_CMD="$2"
+        shift 2
+        ;;
+    -*)
+        echo "Unknown option: $1" >&2
+        echo "Run 'tds --help' for usage." >&2
+        exit 1
+        ;;
+    *)
+        target="$1"
+        shift
+        ;;
+    esac
+done
+
+# --- Validate and Resolve Profile ---
+PROFILE_FILE=""
+if [[ "$PROFILE_EXPLICITLY_SET" == "true" ]]; then
+    PROFILE_FILE="$PROFILES_DIR/${profile_name}.json"
+    if [[ ! -f "$PROFILE_FILE" ]]; then
+        echo "Error: Profile '$profile_name' specified via CLI was not found at $PROFILE_FILE" >&2
+        exit 1
+    fi
+fi
+
+# --- Determine target directory ---
+if [[ "$HIST_MODE" == "true" ]]; then
+    if ! command -v fzf &>/dev/null; then
+        echo "Error: fzf is required for --history mode." >&2
+        exit 1
+    fi
+    if [[ ! -f "$HIST_FILE" ]]; then
+        echo "No history cache found." >&2
+        exit 1
+    fi
+    target=$(fzf <"$HIST_FILE" --prompt="󰉋 Recent Dev Projects > ")
+    if [[ -z "$target" ]]; then
+        echo "Cancelled."
+        exit 0
+    fi
+elif [[ "$FIND_MODE" == "true" ]]; then
+    if ! command -v fzf &>/dev/null; then
+        echo "Error: fzf is required for --find mode." >&2
+        exit 1
+    fi
+    if [ ${#SEARCH_PATHS[@]} -eq 0 ]; then
+        echo "Error: No search paths defined in $CONFIG_FILE" >&2
+        exit 1
+    fi
+
+    label_text="Projects & Submodules"
+    [[ "$PROFILE_EXPLICITLY_SET" == "true" ]] && label_text="Projects (Profile: $profile_name)"
+
+    # Deterministically scan SEARCH_PATHS up to depth 1, sort alphabetically, and ignore hidden folders
+    target=$(find "${SEARCH_PATHS[@]}" -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | fzf \
+        --no-sort \
+        --border-label " 󰅍 $label_text " \
+        --prompt="󰝰 Find Dev Project > ")
+    if [[ -z "$target" ]]; then
+        echo "Cancelled."
+        exit 0
+    fi
+elif [[ "$YAZI_MODE" == "true" ]]; then
+    if ! command -v yazi &>/dev/null; then
+        echo "Error: yazi is required for --yazi mode." >&2
+        exit 1
+    fi
+    tmp="$(mktemp -t "tds.XXXXXX")"
+    yazi --cwd-file="$tmp"
+
+    target=""
+    if [[ -f "$tmp" ]]; then
+        target="$(cat -- "$tmp")"
+        rm -f -- "$tmp"
+    fi
+
+    if [[ -z "$target" ]]; then
+        echo "Cancelled."
+        exit 0
+    fi
+elif [[ -z "$target" ]]; then
+    # Default behavior: use current directory
+    target="$PWD"
+fi
+
+if [[ -n "$target" ]]; then
+    if [[ -d "$target" ]]; then
+        selected="$(cd "$target" && pwd)"
+        add_to_history "$selected"
+    else
+        echo "Error: Directory '$target' not found." >&2
+        exit 1
+    fi
+else
+    selected="$PWD"
+    add_to_history "$selected"
+fi
+
+# --- Short 4-Char Hash Session Naming ---
+base_name=$(basename "$selected" | tr . _)
+hash=$(printf "%s" "$selected" | md5sum | cut -c1-4)
+selected_name="${base_name}-${hash}"
+tmux_running=$(pgrep tmux)
+
+# --- Handle Extensible Editor / Tool Launch ---
+if [[ -n "$EDITOR_CMD" ]]; then
+    setsid "$EDITOR_CMD" "$selected" >/dev/null 2>&1 &
+    sleep 0.2
+fi
+
+# --- Dynamic Session & Window Builder (Profile or 1-Window Fallback) ---
+build_session() {
+    local session="$1"
+    local dir="$2"
+    local profile="$3"
+
+    if [[ -n "$profile" && -f "$profile" ]]; then
+        local win_count
+        win_count=$(jq '.windows | length' "$profile")
+
+        for ((i = 0; i < win_count; i++)); do
+            local w_name w_cmd
+            w_name=$(jq -r --argjson idx "$i" '.windows[$idx].name' "$profile")
+            w_cmd=$(jq -r --argjson idx "$i" '.windows[$idx].command' "$profile")
+
+            if [[ $i -eq 0 ]]; then
+                if [[ -n "$w_cmd" ]]; then
+                    tmux new-session -d -s "$session" -c "$dir" -n "$w_name" "$w_cmd"
+                else
+                    tmux new-session -d -s "$session" -c "$dir" -n "$w_name"
+                fi
+            else
+                if [[ -n "$w_cmd" ]]; then
+                    tmux new-window -t "$session:$((i + 1))" -n "$w_name" -c "$dir" "$w_cmd"
+                else
+                    tmux new-window -t "$session:$((i + 1))" -n "$w_name" -c "$dir"
+                fi
+            fi
+        done
+    else
+        # Fallback: 1 default window named "Terminal" (plain shell)
+        tmux new-session -d -s "$session" -c "$dir" -n "󰞷 Terminal"
+    fi
+
+    tmux select-window -t "$session:1"
+}
+
+# --- Tmux Session Logic ---
+# Case A: If we aren't in tmux and it's not even running, start fresh and attach
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    build_session "$selected_name" "$selected" "$PROFILE_FILE"
+    tmux attach-session -t "$selected_name"
+    exit 0
+fi
+
+# Case B: Create the session in the background if it doesn't exist yet
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+    build_session "$selected_name" "$selected" "$PROFILE_FILE"
+fi
+
+# Case C: Switch or Attach
+if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$selected_name"
+else
+    tmux switch-client -t "$selected_name"
+fi

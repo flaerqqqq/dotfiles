@@ -1,0 +1,24 @@
+{
+    "windows": [
+        {
+            "name": "󰈚 Code",
+            "command": "nvim ."
+        },
+        {
+            "name": "󰞷 Terminal",
+            "command": ""
+        },
+        {
+            "name": "󰚩 AI",
+            "command": ""
+        },
+        {
+            "name": "󰓅 Run",
+            "command": ""
+        },
+        {
+            "name": "󰆧 Infra",
+            "command": ""
+        }
+    ]
+}
