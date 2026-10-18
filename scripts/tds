@@ -41,12 +41,19 @@ while IFS= read -r path; do
     SEARCH_PATHS+=("$path")
 done < <(jq -r '.search_paths[]? // empty' "$CONFIG_FILE" 2>/dev/null)
 
+DEFAULT_PROFILE=$(jq -r '.default_profile // empty' "$CONFIG_FILE" 2>/dev/null)
+
 YAZI_MODE=false
 FIND_MODE=false
 HIST_MODE=false
 EDITOR_CMD=""
 profile_name=""
 PROFILE_EXPLICITLY_SET=false
+NO_PROFILE=false
+LIST_MODE=false
+SESSIONS_MODE=false
+KILL_TARGET=""
+RECREATE=false
 target=""
 
 # --- Help Menu ---
@@ -69,9 +76,16 @@ Selection Options:
   -H, --history         Open fzf to pick from recent project history.
   -f, --find            Deterministically scan search paths and submodules using fzf.
   -y, --yazi            Open the Yazi file manager to interactively select a directory.
+  -s, --sessions        Pick from running tmux sessions with fzf.
 
 Workspace Options:
-  -p, --profile <name>  Use a specific window layout profile (optional)
+  -p, --profile <name>  Use a specific window layout profile. Overrides default_profile.
+      --no-profile      Ignore any profile and use the single-window layout.
+
+Session Options:
+  -l, --list            List tmux sessions.
+  -k, --kill <name|dir> Kill a session by name, or the session for a directory.
+      --recreate        Kill and rebuild the session so a changed profile takes effect.
 
 Editor Options:
   -c, --code            Open project with standalone VS Code ('code')
@@ -88,6 +102,9 @@ Examples:
   tds ./my-app          # Open specific path with fallback 1-window layout
   tds -H                # Pick a project from recent history via fzf
   tds --clean           # Clear the history cache
+  tds -l                # List tmux sessions
+  tds -k .              # Kill the session for the current directory
+  tds -f -p dev --recreate  # Rebuild the picked project's session with the dev profile
 EOF
     exit 0
 }
@@ -117,6 +134,33 @@ add_to_history() {
     fi
 }
 
+# --- Short 4-Char Hash Session Naming ---
+session_name_for() {
+    local path="$1"
+    local base_name hash
+    base_name=$(basename "$path" | tr . _)
+    hash=$(printf "%s" "$path" | md5sum | cut -c1-4)
+    printf '%s-%s' "$base_name" "$hash"
+}
+
+# Reads directories on stdin, prints "<dir><TAB><dir + session/profile label>" for fzf
+project_rows() {
+    local name prof dir label
+    declare -A session_profile=()
+    while IFS=$'\t' read -r name prof; do
+        session_profile["$name"]="$prof"
+    done < <(tmux list-sessions -F $'#{session_name}\t#{@tds_profile}' 2>/dev/null)
+
+    while IFS= read -r dir; do
+        label=""
+        name=$(session_name_for "$dir")
+        if [[ -v session_profile[$name] ]]; then
+            label="   [session: $name | profile: ${session_profile[$name]:--}]"
+        fi
+        printf '%s\t%s%s\n' "$dir" "$dir" "$label"
+    done
+}
+
 # --- Parse arguments ---
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -144,10 +188,34 @@ while [[ $# -gt 0 ]]; do
         YAZI_MODE=true
         shift
         ;;
+    -s | --sessions)
+        SESSIONS_MODE=true
+        shift
+        ;;
     -p | --profile)
         profile_name="$2"
         PROFILE_EXPLICITLY_SET=true
         shift 2
+        ;;
+    --no-profile)
+        NO_PROFILE=true
+        shift
+        ;;
+    -l | --list)
+        LIST_MODE=true
+        shift
+        ;;
+    -k | --kill)
+        if [[ -z "$2" ]]; then
+            echo "Error: --kill requires a session name or directory." >&2
+            exit 1
+        fi
+        KILL_TARGET="$2"
+        shift 2
+        ;;
+    --recreate)
+        RECREATE=true
+        shift
         ;;
     -c | --code)
         EDITOR_CMD="code"
@@ -173,13 +241,45 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# --- Validate and Resolve Profile ---
+# --- Session Management (list / kill, no profile or directory selection needed) ---
+if [[ "$LIST_MODE" == "true" ]]; then
+    tmux list-sessions -F '#{session_name}  #{session_windows}w  #{?session_attached,attached,detached}  #{session_path}' 2>/dev/null || echo "No tmux sessions."
+    exit 0
+fi
+
+if [[ -n "$KILL_TARGET" ]]; then
+    kill_name="$KILL_TARGET"
+    if [[ -d "$KILL_TARGET" ]]; then
+        kill_name=$(session_name_for "$(cd "$KILL_TARGET" && pwd)")
+    fi
+    tmux kill-session -t "=$kill_name" || exit 1
+    echo "Killed session '$kill_name'."
+    exit 0
+fi
+
+# --- Resolve Profile (-p > default_profile > built-in single-window layout) ---
+profile_is_valid() {
+    jq -e '.windows | type == "array"' "$1" &>/dev/null
+}
+
 PROFILE_FILE=""
-if [[ "$PROFILE_EXPLICITLY_SET" == "true" ]]; then
-    PROFILE_FILE="$PROFILES_DIR/${profile_name}.json"
-    if [[ ! -f "$PROFILE_FILE" ]]; then
-        echo "Error: Profile '$profile_name' specified via CLI was not found at $PROFILE_FILE" >&2
-        exit 1
+if [[ "$NO_PROFILE" != "true" ]]; then
+    if [[ "$PROFILE_EXPLICITLY_SET" == "true" ]]; then
+        PROFILE_FILE="$PROFILES_DIR/${profile_name}.json"
+        if [[ ! -f "$PROFILE_FILE" ]]; then
+            echo "Error: Profile '$profile_name' specified via CLI was not found at $PROFILE_FILE" >&2
+            exit 1
+        fi
+        if ! profile_is_valid "$PROFILE_FILE"; then
+            echo "Error: Profile '$profile_name' is invalid (expected a 'windows' array)." >&2
+            exit 1
+        fi
+    elif [[ -n "$DEFAULT_PROFILE" ]]; then
+        PROFILE_FILE="$PROFILES_DIR/${DEFAULT_PROFILE}.json"
+        if [[ ! -f "$PROFILE_FILE" ]] || ! profile_is_valid "$PROFILE_FILE"; then
+            echo "Warning: default_profile '$DEFAULT_PROFILE' is missing or invalid; using single-window layout." >&2
+            PROFILE_FILE=""
+        fi
     fi
 fi
 
@@ -193,7 +293,7 @@ if [[ "$HIST_MODE" == "true" ]]; then
         echo "No history cache found." >&2
         exit 1
     fi
-    target=$(fzf <"$HIST_FILE" --prompt="󰉋 Recent Dev Projects > ")
+    target=$(project_rows <"$HIST_FILE" | fzf --delimiter=$'\t' --with-nth=2.. --prompt="󰉋 Recent Dev Projects > " | cut -f1)
     if [[ -z "$target" ]]; then
         echo "Cancelled."
         exit 0
@@ -209,15 +309,47 @@ elif [[ "$FIND_MODE" == "true" ]]; then
     fi
 
     label_text="Projects & Submodules"
-    [[ "$PROFILE_EXPLICITLY_SET" == "true" ]] && label_text="Projects (Profile: $profile_name)"
+    [[ -n "$PROFILE_FILE" ]] && label_text="Projects (Profile: $(basename "$PROFILE_FILE" .json))"
 
     # Deterministically scan SEARCH_PATHS up to depth 1, sort alphabetically, and ignore hidden folders
-    target=$(find "${SEARCH_PATHS[@]}" -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | fzf \
+    target=$(find "${SEARCH_PATHS[@]}" -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | project_rows | fzf \
         --no-sort \
+        --delimiter=$'\t' \
+        --with-nth=2.. \
         --border-label " 󰅍 $label_text " \
-        --prompt="󰝰 Find Dev Project > ")
+        --prompt="󰝰 Find Dev Project > " | cut -f1)
     if [[ -z "$target" ]]; then
         echo "Cancelled."
+        exit 0
+    fi
+elif [[ "$SESSIONS_MODE" == "true" ]]; then
+    if ! command -v fzf &>/dev/null; then
+        echo "Error: fzf is required for --sessions mode." >&2
+        exit 1
+    fi
+
+    picked=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf \
+        --expect=ctrl-r \
+        --prompt="󰖯 Session > " \
+        --border-label " 󰖲 Sessions " \
+        --header "enter: switch  ctrl-r: recreate  ctrl-x: kill" \
+        --bind "ctrl-x:execute-silent(tmux kill-session -t '='{})+reload(tmux list-sessions -F '#{session_name}' 2>/dev/null)")
+    key=$(head -n1 <<<"$picked")
+    session_pick=$(sed -n 2p <<<"$picked")
+    if [[ -z "$session_pick" ]]; then
+        echo "Cancelled."
+        exit 0
+    fi
+
+    if [[ "$key" == "ctrl-r" ]]; then
+        RECREATE=true
+        target=$(tmux display-message -p -t "=$session_pick:" '#{session_path}')
+    else
+        if [[ -n $TMUX ]]; then
+            tmux switch-client -t "=$session_pick"
+        else
+            tmux attach-session -t "=$session_pick"
+        fi
         exit 0
     fi
 elif [[ "$YAZI_MODE" == "true" ]]; then
@@ -256,25 +388,18 @@ else
     add_to_history "$selected"
 fi
 
-# --- Short 4-Char Hash Session Naming ---
-base_name=$(basename "$selected" | tr . _)
-hash=$(printf "%s" "$selected" | md5sum | cut -c1-4)
-selected_name="${base_name}-${hash}"
+selected_name=$(session_name_for "$selected")
 tmux_running=$(pgrep tmux)
-
-# --- Handle Extensible Editor / Tool Launch ---
-if [[ -n "$EDITOR_CMD" ]]; then
-    setsid "$EDITOR_CMD" "$selected" >/dev/null 2>&1 &
-    sleep 0.2
-fi
 
 # --- Dynamic Session & Window Builder (Profile or 1-Window Fallback) ---
 build_session() {
     local session="$1"
     local dir="$2"
     local profile="$3"
+    local profile_label="basic"
 
     if [[ -n "$profile" && -f "$profile" ]]; then
+        profile_label=$(basename "$profile" .json)
         local win_count
         win_count=$(jq '.windows | length' "$profile")
 
@@ -302,7 +427,13 @@ build_session() {
         tmux new-session -d -s "$session" -c "$dir" -n "󰞷 Terminal"
     fi
 
+    tmux set-option -t "$session:" @tds_profile "$profile_label"
     tmux select-window -t "$session:1"
+
+    if [[ -n "$EDITOR_CMD" ]]; then
+        setsid "$EDITOR_CMD" "$dir" >/dev/null 2>&1 &
+        sleep 0.2
+    fi
 }
 
 # --- Tmux Session Logic ---
@@ -311,6 +442,21 @@ if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
     build_session "$selected_name" "$selected" "$PROFILE_FILE"
     tmux attach-session -t "$selected_name"
     exit 0
+fi
+
+# Recreate: drop the existing session so the profile is rebuilt
+if [[ "$RECREATE" == "true" ]] && tmux has-session -t="$selected_name" 2>/dev/null; then
+    if [[ -n $TMUX ]] && [[ "$(tmux display-message -p '#S')" == "$selected_name" ]]; then
+        rebuild_name="$selected_name-rebuild"
+        old_name="$selected_name-old"
+        build_session "$rebuild_name" "$selected" "$PROFILE_FILE"
+        tmux switch-client -t "$rebuild_name:"
+        tmux rename-session -t "$selected_name:" "$old_name"
+        tmux rename-session -t "$rebuild_name:" "$selected_name"
+        tmux kill-session -t "$old_name:"
+        exit 0
+    fi
+    tmux kill-session -t "=$selected_name"
 fi
 
 # Case B: Create the session in the background if it doesn't exist yet
