@@ -1,0 +1,13 @@
+# fzf defaults, loaded through FZF_DEFAULT_OPTS_FILE (see .zshrc)
+# Palette: Kanagawa Dragon, matching nvim and kitty
+
+--border=rounded
+--border-label-pos=2
+--padding=0,1
+--info=inline-right
+--pointer=▌
+--marker=┃
+--prompt=
+--color=fg:#c5c9c5,bg:#181616,hl:#8ea4a2,fg+:#c5c9c5,bg+:#282727,hl+:#8ea4a2
+--color=info:#625e5a,prompt:#8ba4b0,pointer:#c4746e,marker:#87a987,spinner:#87a987
+--color=header:#8ea4a2,border:#393836,label:#8ba4b0,query:#c5c9c5,gutter:#181616
