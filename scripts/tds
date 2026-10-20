@@ -146,28 +146,33 @@ session_name_for() {
     printf '%s-%s' "$base_name" "$hash"
 }
 
+is_project_dir() {
+    local p
+    for p in "${SEARCH_PATHS[@]}"; do
+        [[ "$(dirname "$1")" == "${p%/}" ]] && return 0
+    done
+    return 1
+}
+
 # Reads directories on stdin, prints "<dir><TAB><label><session/profile info>" for fzf.
 # With "short": label is the basename (full path on name collision) and $PWD is skipped.
 project_rows() {
     local short="${1:-}" name prof dir label shown
-    declare -A session_profile=() base_count=()
+    declare -A session_profile=()
     while IFS=$'\t' read -r name prof; do
         session_profile["$name"]="$prof"
     done < <(tmux list-sessions -f "$MANAGED_FILTER" -F $'#{session_name}\t#{@tds_profile}' 2>/dev/null)
 
     local -a dirs=()
     mapfile -t dirs
-    if [[ -n "$short" ]]; then
-        for dir in "${dirs[@]}"; do
-            base_count["${dir##*/}"]=$((${base_count["${dir##*/}"]:-0} + 1))
-        done
-    fi
-
     for dir in "${dirs[@]}"; do
         shown="$dir"
         if [[ -n "$short" ]]; then
-            shown="${dir##*/}"
-            [[ ${base_count[$shown]} -gt 1 ]] && shown="$dir"
+            if is_project_dir "$dir"; then
+                shown="${dir##*/}"
+            else
+                shown="${dir/#$HOME\//\~/}"
+            fi
         fi
         label=""
         name=$(session_name_for "$dir")
@@ -368,7 +373,16 @@ elif [[ "$FIND_MODE" == "true" ]]; then
 
     # Deterministically scan SEARCH_PATHS up to depth 1, sort alphabetically, and ignore hidden folders
     list_projects() {
-        find "${SEARCH_PATHS[@]}" -mindepth 1 -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | project_rows short
+        local listed here mark="" managed path
+        here="$PWD"
+        if [[ -n $TMUX && -z $TMUX_PANE ]]; then
+            IFS=$'\t' read -r managed path < <(tmux display-message -p $'#{@tds_managed}\t#{session_path}')
+            [[ "$managed" == "1" ]] && here="$path"
+        fi
+        listed=$(find "${SEARCH_PATHS[@]}" -mindepth 1 -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort)
+        grep -qxF -- "$here" <<<"$listed" || mark="* "
+        { echo "$here"; grep -vxF -- "$here" <<<"$listed"; } | project_rows short |
+            awk -F'\t' -v p="$here" -v m="$mark" 'BEGIN { OFS = "\t" } $1 == p { $2 = m $2 } 1'
     }
     while true; do
         picked=$(list_projects | fzf --expect=ctrl-r,ctrl-p,ctrl-x \
@@ -377,7 +391,7 @@ elif [[ "$FIND_MODE" == "true" ]]; then
             --with-nth=2.. \
             --border-label " 󰅍 $label_text " \
             --header "enter: open  ctrl-r: rebuild  ctrl-p: rebuild with profile  ctrl-x: kill session" \
-            --prompt="󰝰 Find Dev Project > ")
+            --prompt="󰝰 Project > ")
         key=$(head -n1 <<<"$picked")
         target=$(sed -n 2p <<<"$picked" | cut -f1)
         if [[ "$key" == "ctrl-x" && -n "$target" ]]; then
@@ -411,19 +425,20 @@ elif [[ "$SESSIONS_MODE" == "true" ]]; then
         [[ -n "$rows" ]] || return 0
         current=""
         [[ -n $TMUX ]] && current=$(tmux display-message -p '#S')
-        awk -F'\t' -v c="$current" '
+        local search_paths
+        search_paths=$(IFS='|'; echo "${SEARCH_PATHS[*]}")
+        awk -F'\t' -v c="$current" -v sp="$search_paths" -v home="$HOME" '
             function base(p,   n, parts) { n = split(p, parts, "/"); return parts[n] }
+            function shorten(p) { return index(p, home "/") == 1 ? "~/" substr(p, length(home) + 2) : p }
+            function is_project(p,   parent) { parent = p; sub(/\/[^\/]*$/, "", parent); return parent in sp_set }
+            BEGIN { n = split(sp, list, "|"); for (i = 1; i <= n; i++) sp_set[list[i]] = 1 }
             { rows[++total] = $0 }
             END {
-                for (i = 1; i <= total; i++) {
-                    split(rows[i], f, "\t")
-                    count[base(f[3])]++
-                }
                 for (pass = 0; pass < 2; pass++)
                     for (i = 1; i <= total; i++) {
                         split(rows[i], f, "\t")
                         if ((pass == 0) != (f[1] == c)) continue
-                        proj = count[base(f[3])] > 1 ? f[3] : base(f[3])
+                        proj = is_project(f[3]) ? base(f[3]) : shorten(f[3])
                         printf "%s\t%s   [session: %s | profile: %s]\n", f[1], proj, f[1], f[2]
                     }
             }
@@ -431,12 +446,12 @@ elif [[ "$SESSIONS_MODE" == "true" ]]; then
     }
 
     while true; do
-        picked=$(session_rows | fzf --expect=ctrl-r,ctrl-x \
+        picked=$(session_rows | fzf --expect=ctrl-r,ctrl-p,ctrl-x \
             --delimiter=$'\t' \
             --with-nth=2.. \
             --prompt="󰖯 Session > " \
             --border-label " 󰖲 Sessions " \
-            --header "enter: switch  ctrl-r: recreate  ctrl-x: kill")
+            --header "enter: switch  ctrl-r: recreate  ctrl-p: recreate with profile  ctrl-x: kill")
         key=$(head -n1 <<<"$picked")
         session_pick=$(sed -n 2p <<<"$picked" | cut -f1)
         if [[ "$key" == "ctrl-x" && -n "$session_pick" ]]; then
@@ -450,8 +465,11 @@ elif [[ "$SESSIONS_MODE" == "true" ]]; then
         exit 0
     fi
 
-    if [[ "$key" == "ctrl-r" ]]; then
+    if [[ "$key" == "ctrl-r" || "$key" == "ctrl-p" ]]; then
         RECREATE=true
+        if [[ "$key" == "ctrl-p" ]]; then
+            pick_profile "$session_pick" || { echo "Cancelled."; exit 0; }
+        fi
         target=$(tmux display-message -p -t "=$session_pick:" '#{session_path}')
     else
         if [[ -n $TMUX ]]; then
