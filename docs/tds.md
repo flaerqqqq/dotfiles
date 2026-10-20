@@ -63,6 +63,7 @@ Session management:
 | --- | --- |
 | `-l`, `--list` | List tds-managed sessions (name, window count, attached state, path). Exits without touching anything. |
 | `-k`, `--kill <name\|dir>` | Kill a session by exact name, or the session for a directory (same naming as `tds`). |
+| `--doctor` | Check that tmux, jq and fzf are installed, the config and every profile parse, `search_paths` and `default_profile` exist, and managed sessions have existing directories and profiles. Prints `OK`, `WARN` or `ERR` per check and exits 1 on any `ERR`. |
 | `--recreate` | If the session exists, kill it and rebuild it, so a changed profile takes effect. Without `-p`, it uses the profile recorded in the session's `@tds_profile` (`basic` means the single-window layout), falling back to `default_profile` if that profile is missing. |
 
 `--recreate` kills running processes in that session, so use it deliberately. When run from inside
