@@ -37,7 +37,7 @@ Selection (one mode at a time; the last one parsed wins, see "Selection preceden
 | `-H`, `--history` | Pick from history with fzf. |
 | `-f`, `--find` | Pick from the first level of every `search_paths` entry with fzf. |
 | `-y`, `--yazi` | Pick a directory in yazi; the directory yazi is in on exit is used. |
-| `-s`, `--sessions` | Pick from running tmux sessions. Enter switches, `ctrl-r` recreates the picked session, `ctrl-x` kills it. |
+| `-s`, `--sessions` | Pick from tds-managed tmux sessions. Enter switches, `ctrl-r` recreates the picked session, `ctrl-x` kills it. |
 
 Workspace and editor:
 
@@ -49,16 +49,20 @@ Workspace and editor:
 | `-i`, `--idea` | Launch `idea <dir>` in the background, only when the session is created. |
 | `-e`, `--editor <cmd>` | Launch `<cmd> <dir>` in the background, only when the session is created. |
 
-`-f` and `-H` mark directories that already have a session, showing the session name and the profile it was created with
-(stored in the tmux session option `@tds_profile`; `-` for sessions created outside `tds`).
+`tds` only manages sessions tagged with the tmux session option `@tds_managed=1`, which it sets when it builds a session.
+Sessions created outside `tds` are ignored by `-f`, `-H`, `-s`, `-l` and `-k`. A session created before this tag existed
+can be adopted with `tmux set-option -t <name>: @tds_managed 1`.
+
+`-f` and `-H` mark directories that already have a managed session, showing the session name and the profile it was created with
+(stored in the tmux session option `@tds_profile`).
 
 Session management:
 
 | Flag | Behavior |
 | --- | --- |
-| `-l`, `--list` | List tmux sessions (name, window count, attached state, path). Exits without touching anything. |
+| `-l`, `--list` | List tds-managed sessions (name, window count, attached state, path). Exits without touching anything. |
 | `-k`, `--kill <name\|dir>` | Kill a session by exact name, or the session for a directory (same naming as `tds`). |
-| `--recreate` | If the session exists, kill it and rebuild it, so a changed profile takes effect. |
+| `--recreate` | If the session exists, kill it and rebuild it, so a changed profile takes effect. Without `-p`, it uses the profile recorded in the session's `@tds_profile` (`basic` means the single-window layout), falling back to `default_profile` if that profile is missing. |
 
 `--recreate` kills running processes in that session, so use it deliberately. When run from inside
 that session, `tds` builds the replacement under a temporary name, switches you to it, and then
@@ -140,7 +144,7 @@ Profile precedence:
 A profile is valid when its `windows` field is an array.
 
 Profiles only apply when a session is **created**. If the session already exists,
-`-p` has no effect unless `--recreate` is given.
+`-p` has no effect on an existing session unless `--recreate` is given.
 
 The current `dev` profile has five windows: Code (`nvim .`), Terminal, AI, Run, Infra.
 

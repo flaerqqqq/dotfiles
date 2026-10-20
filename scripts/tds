@@ -16,6 +16,7 @@ CONFIG_FILE="$CONFIG_DIR/config.json"
 PROFILES_DIR="$CONFIG_DIR/profiles"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tds"
 HIST_FILE="$CACHE_DIR/history"
+MANAGED_FILTER='#{==:#{@tds_managed},1}'
 
 # Auto-create config directory and config.json if they don't exist
 if [[ ! -f "$CONFIG_FILE" ]]; then
@@ -143,21 +144,35 @@ session_name_for() {
     printf '%s-%s' "$base_name" "$hash"
 }
 
-# Reads directories on stdin, prints "<dir><TAB><dir + session/profile label>" for fzf
+# Reads directories on stdin, prints "<dir><TAB><label><session/profile info>" for fzf.
+# With "short": label is the basename (full path on name collision) and $PWD is skipped.
 project_rows() {
-    local name prof dir label
-    declare -A session_profile=()
+    local short="${1:-}" name prof dir label shown
+    declare -A session_profile=() base_count=()
     while IFS=$'\t' read -r name prof; do
         session_profile["$name"]="$prof"
-    done < <(tmux list-sessions -F $'#{session_name}\t#{@tds_profile}' 2>/dev/null)
+    done < <(tmux list-sessions -f "$MANAGED_FILTER" -F $'#{session_name}\t#{@tds_profile}' 2>/dev/null)
 
-    while IFS= read -r dir; do
+    local -a dirs=()
+    mapfile -t dirs
+    if [[ -n "$short" ]]; then
+        for dir in "${dirs[@]}"; do
+            base_count["${dir##*/}"]=$((${base_count["${dir##*/}"]:-0} + 1))
+        done
+    fi
+
+    for dir in "${dirs[@]}"; do
+        shown="$dir"
+        if [[ -n "$short" ]]; then
+            shown="${dir##*/}"
+            [[ ${base_count[$shown]} -gt 1 ]] && shown="$dir"
+        fi
         label=""
         name=$(session_name_for "$dir")
         if [[ -v session_profile[$name] ]]; then
             label="   [session: $name | profile: ${session_profile[$name]:--}]"
         fi
-        printf '%s\t%s%s\n' "$dir" "$dir" "$label"
+        printf '%s\t%s%s\n' "$dir" "$shown" "$label"
     done
 }
 
@@ -243,7 +258,7 @@ done
 
 # --- Session Management (list / kill, no profile or directory selection needed) ---
 if [[ "$LIST_MODE" == "true" ]]; then
-    tmux list-sessions -F '#{session_name}  #{session_windows}w  #{?session_attached,attached,detached}  #{session_path}' 2>/dev/null || echo "No tmux sessions."
+    tmux list-sessions -f "$MANAGED_FILTER" -F '#{session_name}  #{session_windows}w  #{?session_attached,attached,detached}  #{session_path}' 2>/dev/null || echo "No tds sessions."
     exit 0
 fi
 
@@ -251,6 +266,10 @@ if [[ -n "$KILL_TARGET" ]]; then
     kill_name="$KILL_TARGET"
     if [[ -d "$KILL_TARGET" ]]; then
         kill_name=$(session_name_for "$(cd "$KILL_TARGET" && pwd)")
+    fi
+    if ! tmux list-sessions -f "$MANAGED_FILTER" -F '#{session_name}' | grep -qxF -- "$kill_name"; then
+        echo "Error: '$kill_name' is not a tds session." >&2
+        exit 1
     fi
     tmux kill-session -t "=$kill_name" || exit 1
     echo "Killed session '$kill_name'."
@@ -312,7 +331,7 @@ elif [[ "$FIND_MODE" == "true" ]]; then
     [[ -n "$PROFILE_FILE" ]] && label_text="Projects (Profile: $(basename "$PROFILE_FILE" .json))"
 
     # Deterministically scan SEARCH_PATHS up to depth 1, sort alphabetically, and ignore hidden folders
-    target=$(find "${SEARCH_PATHS[@]}" -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | project_rows | fzf \
+    target=$(find "${SEARCH_PATHS[@]}" -mindepth 1 -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | project_rows short | fzf \
         --no-sort \
         --delimiter=$'\t' \
         --with-nth=2.. \
@@ -328,12 +347,19 @@ elif [[ "$SESSIONS_MODE" == "true" ]]; then
         exit 1
     fi
 
-    picked=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf \
-        --expect=ctrl-r \
+    sessions=$(tmux list-sessions -f "$MANAGED_FILTER" -F '#{session_name}' 2>/dev/null)
+    if [[ -n $TMUX ]]; then
+        current_session=$(tmux display-message -p '#S')
+        if grep -qxF -- "$current_session" <<<"$sessions"; then
+            sessions=$({ echo "$current_session"; grep -vxF -- "$current_session" <<<"$sessions"; })
+        fi
+    fi
+    picked=$(fzf --expect=ctrl-r \
         --prompt="󰖯 Session > " \
         --border-label " 󰖲 Sessions " \
         --header "enter: switch  ctrl-r: recreate  ctrl-x: kill" \
-        --bind "ctrl-x:execute-silent(tmux kill-session -t '='{})+reload(tmux list-sessions -F '#{session_name}' 2>/dev/null)")
+        --bind "ctrl-x:execute-silent(tmux kill-session -t '='{})+reload(tmux list-sessions -f '$MANAGED_FILTER' -F '#{session_name}' 2>/dev/null)" \
+        <<<"$sessions")
     key=$(head -n1 <<<"$picked")
     session_pick=$(sed -n 2p <<<"$picked")
     if [[ -z "$session_pick" ]]; then
@@ -428,6 +454,7 @@ build_session() {
     fi
 
     tmux set-option -t "$session:" @tds_profile "$profile_label"
+    tmux set-option -t "$session:" @tds_managed 1
     tmux select-window -t "$session:1"
 
     if [[ -n "$EDITOR_CMD" ]]; then
@@ -446,6 +473,18 @@ fi
 
 # Recreate: drop the existing session so the profile is rebuilt
 if [[ "$RECREATE" == "true" ]] && tmux has-session -t="$selected_name" 2>/dev/null; then
+    if [[ "$NO_PROFILE" != "true" && "$PROFILE_EXPLICITLY_SET" != "true" ]]; then
+        current_profile=$(tmux display-message -p -t "=$selected_name:" '#{@tds_profile}')
+        if [[ "$current_profile" == "basic" ]]; then
+            PROFILE_FILE=""
+        elif [[ -n "$current_profile" ]]; then
+            if [[ -f "$PROFILES_DIR/$current_profile.json" ]] && profile_is_valid "$PROFILES_DIR/$current_profile.json"; then
+                PROFILE_FILE="$PROFILES_DIR/$current_profile.json"
+            else
+                echo "Warning: session profile '$current_profile' is missing or invalid; using the default profile." >&2
+            fi
+        fi
+    fi
     if [[ -n $TMUX ]] && [[ "$(tmux display-message -p '#S')" == "$selected_name" ]]; then
         rebuild_name="$selected_name-rebuild"
         old_name="$selected_name-old"
