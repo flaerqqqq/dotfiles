@@ -50,6 +50,7 @@ HIST_MODE=false
 EDITOR_CMD=""
 profile_name=""
 PROFILE_EXPLICITLY_SET=false
+PROFILE_PICK=false
 NO_PROFILE=false
 LIST_MODE=false
 SESSIONS_MODE=false
@@ -81,6 +82,7 @@ Selection Options:
 
 Workspace Options:
   -p, --profile <name>  Use a specific window layout profile. Overrides default_profile.
+  -P, --select-profile  Pick the profile with fzf. Rebuilds the session if it exists.
       --no-profile      Ignore any profile and use the single-window layout.
 
 Session Options:
@@ -212,6 +214,10 @@ while [[ $# -gt 0 ]]; do
         PROFILE_EXPLICITLY_SET=true
         shift 2
         ;;
+    -P | --select-profile)
+        PROFILE_PICK=true
+        shift
+        ;;
     --no-profile)
         NO_PROFILE=true
         shift
@@ -281,6 +287,36 @@ profile_is_valid() {
     jq -e '.windows | type == "array"' "$1" &>/dev/null
 }
 
+pick_profile() {
+    local name="$1" default_profile pref_profile pref_marker chosen
+    default_profile=${DEFAULT_PROFILE:-basic}
+    pref_profile="$default_profile"
+    pref_marker="Default"
+    if tmux list-sessions -f "$MANAGED_FILTER" -F '#{session_name}' | grep -qxF -- "$name"; then
+        pref_profile=$(tmux display-message -p -t "=$name:" '#{@tds_profile}')
+        pref_profile=${pref_profile:-basic}
+        pref_marker="Current"
+    fi
+    chosen=$({
+        if [[ "$pref_marker" == "Current" ]]; then
+            printf '%s\t[Current: %s]\n' "$pref_profile" "$pref_profile"
+        fi
+        printf '%s\t[Default: %s]\n' "$default_profile" "$default_profile"
+        { echo basic; find "$PROFILES_DIR" -maxdepth 1 -name '*.json' -exec basename {} .json \; ; } | sort -u |
+            while IFS= read -r p; do
+                [[ "$p" == "$pref_profile" || "$p" == "$default_profile" ]] || printf '%s\t%s\n' "$p" "$p"
+            done
+    } | fzf --no-sort --delimiter=$'\t' --with-nth=2.. \
+        --prompt="󰒓 Profile > " --border-label " 󰒓 Profiles " | cut -f1)
+    [[ -n "$chosen" ]] || return 1
+    PROFILE_EXPLICITLY_SET=true
+    if [[ "$chosen" == "basic" ]]; then
+        PROFILE_FILE=""
+    else
+        PROFILE_FILE="$PROFILES_DIR/$chosen.json"
+    fi
+}
+
 PROFILE_FILE=""
 if [[ "$NO_PROFILE" != "true" ]]; then
     if [[ "$PROFILE_EXPLICITLY_SET" == "true" ]]; then
@@ -331,12 +367,34 @@ elif [[ "$FIND_MODE" == "true" ]]; then
     [[ -n "$PROFILE_FILE" ]] && label_text="Projects (Profile: $(basename "$PROFILE_FILE" .json))"
 
     # Deterministically scan SEARCH_PATHS up to depth 1, sort alphabetically, and ignore hidden folders
-    target=$(find "${SEARCH_PATHS[@]}" -mindepth 1 -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | project_rows short | fzf \
-        --no-sort \
-        --delimiter=$'\t' \
-        --with-nth=2.. \
-        --border-label " 󰅍 $label_text " \
-        --prompt="󰝰 Find Dev Project > " | cut -f1)
+    list_projects() {
+        find "${SEARCH_PATHS[@]}" -mindepth 1 -maxdepth 1 -not -path '*/.*' -type d 2>/dev/null | sort | project_rows short
+    }
+    while true; do
+        picked=$(list_projects | fzf --expect=ctrl-r,ctrl-p,ctrl-x \
+            --no-sort \
+            --delimiter=$'\t' \
+            --with-nth=2.. \
+            --border-label " 󰅍 $label_text " \
+            --header "enter: open  ctrl-r: rebuild  ctrl-p: rebuild with profile  ctrl-x: kill session" \
+            --prompt="󰝰 Find Dev Project > ")
+        key=$(head -n1 <<<"$picked")
+        target=$(sed -n 2p <<<"$picked" | cut -f1)
+        if [[ "$key" == "ctrl-x" && -n "$target" ]]; then
+            kill_name=$(session_name_for "$target")
+            if tmux list-sessions -f "$MANAGED_FILTER" -F '#{session_name}' | grep -qxF -- "$kill_name"; then
+                tmux kill-session -t "=$kill_name"
+            fi
+            continue
+        fi
+        break
+    done
+    if [[ "$key" == "ctrl-r" || "$key" == "ctrl-p" ]]; then
+        RECREATE=true
+    fi
+    if [[ "$key" == "ctrl-p" && -n "$target" ]]; then
+        pick_profile "$(session_name_for "$target")" || { echo "Cancelled."; exit 0; }
+    fi
     if [[ -z "$target" ]]; then
         echo "Cancelled."
         exit 0
@@ -347,21 +405,46 @@ elif [[ "$SESSIONS_MODE" == "true" ]]; then
         exit 1
     fi
 
-    sessions=$(tmux list-sessions -f "$MANAGED_FILTER" -F '#{session_name}' 2>/dev/null)
-    if [[ -n $TMUX ]]; then
-        current_session=$(tmux display-message -p '#S')
-        if grep -qxF -- "$current_session" <<<"$sessions"; then
-            sessions=$({ echo "$current_session"; grep -vxF -- "$current_session" <<<"$sessions"; })
+    session_rows() {
+        local rows current
+        rows=$(tmux list-sessions -f "$MANAGED_FILTER" -F $'#{session_name}\t#{@tds_profile}\t#{session_path}' 2>/dev/null)
+        [[ -n "$rows" ]] || return 0
+        current=""
+        [[ -n $TMUX ]] && current=$(tmux display-message -p '#S')
+        awk -F'\t' -v c="$current" '
+            function base(p,   n, parts) { n = split(p, parts, "/"); return parts[n] }
+            { rows[++total] = $0 }
+            END {
+                for (i = 1; i <= total; i++) {
+                    split(rows[i], f, "\t")
+                    count[base(f[3])]++
+                }
+                for (pass = 0; pass < 2; pass++)
+                    for (i = 1; i <= total; i++) {
+                        split(rows[i], f, "\t")
+                        if ((pass == 0) != (f[1] == c)) continue
+                        proj = count[base(f[3])] > 1 ? f[3] : base(f[3])
+                        printf "%s\t%s   [session: %s | profile: %s]\n", f[1], proj, f[1], f[2]
+                    }
+            }
+        ' <<<"$rows"
+    }
+
+    while true; do
+        picked=$(session_rows | fzf --expect=ctrl-r,ctrl-x \
+            --delimiter=$'\t' \
+            --with-nth=2.. \
+            --prompt="󰖯 Session > " \
+            --border-label " 󰖲 Sessions " \
+            --header "enter: switch  ctrl-r: recreate  ctrl-x: kill")
+        key=$(head -n1 <<<"$picked")
+        session_pick=$(sed -n 2p <<<"$picked" | cut -f1)
+        if [[ "$key" == "ctrl-x" && -n "$session_pick" ]]; then
+            tmux kill-session -t "=$session_pick"
+            continue
         fi
-    fi
-    picked=$(fzf --expect=ctrl-r \
-        --prompt="󰖯 Session > " \
-        --border-label " 󰖲 Sessions " \
-        --header "enter: switch  ctrl-r: recreate  ctrl-x: kill" \
-        --bind "ctrl-x:execute-silent(tmux kill-session -t '='{})+reload(tmux list-sessions -f '$MANAGED_FILTER' -F '#{session_name}' 2>/dev/null)" \
-        <<<"$sessions")
-    key=$(head -n1 <<<"$picked")
-    session_pick=$(sed -n 2p <<<"$picked")
+        break
+    done
     if [[ -z "$session_pick" ]]; then
         echo "Cancelled."
         exit 0
@@ -415,6 +498,10 @@ else
 fi
 
 selected_name=$(session_name_for "$selected")
+if [[ "$PROFILE_PICK" == "true" && "$PROFILE_EXPLICITLY_SET" != "true" ]]; then
+    RECREATE=true
+    pick_profile "$selected_name" || { echo "Cancelled."; exit 0; }
+fi
 tmux_running=$(pgrep tmux)
 
 # --- Dynamic Session & Window Builder (Profile or 1-Window Fallback) ---

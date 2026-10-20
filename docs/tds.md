@@ -44,6 +44,7 @@ Workspace and editor:
 | Flag | Behavior |
 | --- | --- |
 | `-p`, `--profile <name>` | Use `profiles/<name>.json`. Error if the file is missing or has no `windows` array. |
+| `-P`, `--select-profile` | Pick the profile with fzf. The preselected entry is the session's current profile, or `default_profile` if there is no session. Rebuilds the session if it exists, like `ctrl-p` in `-f`. |
 | `--no-profile` | Ignore `default_profile` and any `-p`; use the single-window layout. |
 | `-c`, `--code` | Launch `code <dir>` in the background, only when the session is created. |
 | `-i`, `--idea` | Launch `idea <dir>` in the background, only when the session is created. |
