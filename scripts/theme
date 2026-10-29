@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+#
+# theme [id] — list themes, or switch Ghostty, Neovim, tmux, fzf and ledge to one.
+# Theme ids are the file names in .config/ghostty/themes and
+# .config/nvim/lua/plugins/themes (without extension).
+set -euo pipefail
+
+DOTFILES="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+GHOSTTY_THEMES="$DOTFILES/.config/ghostty/themes"
+NVIM_THEMES="$DOTFILES/.config/nvim/lua/plugins/themes"
+TMUX_THEMES="$DOTFILES/.config/tmux/themes"
+FZF_THEMES="$DOTFILES/.config/fzf/themes"
+LEDGE_THEMES="$DOTFILES/.config/ledge/themes"
+LEDGE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ledge/config.json"
+FZF_BASE="$DOTFILES/.config/fzf/config"
+FZF_ACTIVE="${XDG_CONFIG_HOME:-$HOME/.config}/fzf/active"
+GHOSTTY_ACTIVE="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/theme-active.conf"
+TMUX_ACTIVE="${XDG_CONFIG_HOME:-$HOME/.config}/tmux/theme-active.conf"
+STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/theme/current"
+
+current() {
+    if [[ -f "$STATE_FILE" ]]; then
+        cat "$STATE_FILE"
+    fi
+}
+
+list() {
+    local active id
+    active="$(current)"
+    for f in "$GHOSTTY_THEMES"/*.conf; do
+        id="$(basename "$f" .conf)"
+        if [[ "$id" == "$active" ]]; then
+            echo "* $id"
+        else
+            echo "  $id"
+        fi
+    done
+}
+
+# Merge the theme and theme_colors of the ledge theme file into ledge's config.json,
+# keeping its other keys. Skipped when ledge has no config or jq is missing.
+apply_ledge() {
+    local id="$1" tmp
+    if [[ ! -f "$LEDGE_CONFIG" ]] || ! command -v jq >/dev/null; then
+        echo "ledge:   no config or no jq, skipped"
+        return
+    fi
+    tmp="$(mktemp)"
+    jq --slurpfile t "$LEDGE_THEMES/$id.json" \
+        'del(.theme, .theme_colors) + $t[0]' "$LEDGE_CONFIG" >"$tmp"
+    cat "$tmp" >"$LEDGE_CONFIG"
+    rm -f "$tmp"
+    echo "ledge:   config updated, applies on next launch"
+}
+
+apply() {
+    local id="$1"
+    if [[ ! -f "$GHOSTTY_THEMES/$id.conf" ]]; then
+        echo "unknown theme for ghostty: $id" >&2
+        exit 1
+    fi
+    if [[ ! -f "$NVIM_THEMES/$id.lua" ]]; then
+        echo "unknown theme for nvim: $id" >&2
+        exit 1
+    fi
+    if [[ ! -f "$TMUX_THEMES/$id.conf" ]]; then
+        echo "unknown theme for tmux: $id" >&2
+        exit 1
+    fi
+    if [[ ! -f "$FZF_THEMES/$id.conf" ]]; then
+        echo "unknown theme for fzf: $id" >&2
+        exit 1
+    fi
+
+    if [[ ! -f "$LEDGE_THEMES/$id.json" ]]; then
+        echo "unknown theme for ledge: $id" >&2
+        exit 1
+    fi
+
+    mkdir -p "$(dirname "$STATE_FILE")" "$(dirname "$GHOSTTY_ACTIVE")" "$(dirname "$TMUX_ACTIVE")" "$(dirname "$FZF_ACTIVE")"
+    printf '%s\n' "$id" >"$STATE_FILE"
+    rm -f "$(dirname "$STATE_FILE")/nvim"
+    ln -sfn "$GHOSTTY_THEMES/$id.conf" "$GHOSTTY_ACTIVE"
+    ln -sfn "$TMUX_THEMES/$id.conf" "$TMUX_ACTIVE"
+    cat "$FZF_BASE" "$FZF_THEMES/$id.conf" >"$FZF_ACTIVE"
+
+    apply_ledge "$id"
+
+    if tmux info >/dev/null 2>&1; then
+        for name in text bg-bar bg-pane highlight selection info accent notice error muted alert; do
+            tmux set -gu "@ukiyo-color-$name"
+        done
+        tmux source-file "$HOME/.config/tmux/tmux.conf"
+        echo "tmux:    reloaded"
+    else
+        echo "tmux:    no running server, applies on next start"
+    fi
+    echo "theme set to $id"
+    echo "  ghostty: reload config (ctrl+shift+comma) or restart"
+    echo "  nvim:    switches on next focus, or on next start"
+    echo "  fzf:     new shells only"
+}
+
+pick() {
+    local choice
+    choice="$(list | fzf --reverse --height=40% --prompt='theme> ' --header="current: $(current)" || true)"
+    if [[ -z "$choice" ]]; then
+        exit 0
+    fi
+    apply "$(echo "$choice" | sed 's/^[* ] //')"
+}
+
+if [[ $# -eq 0 ]]; then
+    if [[ -t 0 && -t 1 ]] && command -v fzf >/dev/null; then
+        pick
+    else
+        list
+    fi
+else
+    apply "$1"
+fi

@@ -20,4 +20,4 @@ hl.env("GDK_BACKEND", "wayland")
 hl.env("ILLOGICAL_IMPULSE_VIRTUAL_ENV", "~/.local/state/quickshell/.venv")
 
 -- ######## Terminal application #########
-hl.env("TERMINAL", "kitty -1")
+hl.env("TERMINAL", "ghostty")

@@ -1,0 +1,878 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-20T07:26:50.941Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 5575784,
+      "turns": 92,
+      "files": 15,
+      "netLines": 594,
+      "toolCallsTotal": 87,
+      "toolSuccessRate": 96.6,
+      "totalCostUSD": 0,
+      "cacheReadCostUSD": 0,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [
+      "claude-haiku-5-5"
+    ],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "vitalii_verzun@epam.com",
+    "periodStart": "2026-10-19T18:07:49.801Z",
+    "periodEnd": "2026-10-19T19:40:45.585Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "7f1f3f61-7638-478d-b7bd-30c9af7f01b9",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "I suggest let's forget about right now nvim configuration, but let's start like designing workflow, because doing anything yields no results, so i suggest we take intellij idea as our idol, and we understand what functionality is here like literallly everything, so first research this topic and create a list with important functionality, then we will map this functionality to .. binds, like we'll only design optional and best keymaps for development",
+      "project": "/home/vitalii_v/dotfiles",
+      "branch": "main",
+      "startTime": 1792433269801,
+      "durationMs": 5575784,
+      "turns": 92,
+      "fileOps": 15,
+      "linesAdded": 631,
+      "linesRemoved": 37,
+      "linesModified": 0,
+      "netLines": 594,
+      "filesChanged": 10,
+      "filesWritten": 9,
+      "filesEdited": 6,
+      "toolCallsTotal": 87,
+      "toolCallsSuccess": 84,
+      "toolCallsFailure": 3,
+      "models": [
+        "claude-haiku-5-5"
+      ],
+      "languages": [
+        "markdown"
+      ],
+      "tools": [
+        {
+          "toolName": "Bash",
+          "totalCalls": 63,
+          "successCount": 60,
+          "failureCount": 3,
+          "successRate": 95.23809523809523
+        },
+        {
+          "toolName": "Write",
+          "totalCalls": 9,
+          "successCount": 9,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Edit",
+          "totalCalls": 9,
+          "successCount": 9,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "Read",
+          "totalCalls": 5,
+          "successCount": 5,
+          "failureCount": 0,
+          "successRate": 100
+        },
+        {
+          "toolName": "AskUserQuestion",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0,
+          "successRate": 100
+        }
+      ],
+      "tokens": {
+        "input": 174,
+        "output": 63075,
+        "cacheRead": 8293321,
+        "cacheCreation": 114706,
+        "cacheCreation1h": 114706,
+        "total": 8471276
+      },
+      "costUSD": 0,
+      "cacheReadCostUSD": 0,
+      "perModelCost": [
+        {
+          "model": "claude-haiku-5-5",
+          "tokens": {
+            "input": 12,
+            "output": 4380,
+            "cacheRead": 499099,
+            "cacheCreation": 14397,
+            "cacheCreation1h": 14397,
+            "total": 517888
+          },
+          "costUSD": 0,
+          "unpriced": true
+        },
+        {
+          "model": "claude-haiku-5-5",
+          "tokens": {
+            "input": 162,
+            "output": 58695,
+            "cacheRead": 7794222,
+            "cacheCreation": 100309,
+            "cacheCreation1h": 100309,
+            "total": 7953388
+          },
+          "costUSD": 0,
+          "unpriced": true
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "/home/vitalii_v/.claude/projects/-home-vitalii-v-dotfiles/5932367e-acf8-474a-870c-117d090ca969.jsonl",
+      "costSeries": [
+        {
+          "t": 1792436888818,
+          "cost": 0,
+          "tokens": 41444
+        },
+        {
+          "t": 1792436901836,
+          "cost": 0,
+          "tokens": 141877
+        },
+        {
+          "t": 1792436917584,
+          "cost": 0,
+          "tokens": 272347
+        },
+        {
+          "t": 1792437084992,
+          "cost": 0,
+          "tokens": 411794
+        },
+        {
+          "t": 1792437143583,
+          "cost": 0,
+          "tokens": 555319
+        },
+        {
+          "t": 1792437166622,
+          "cost": 0,
+          "tokens": 702371
+        },
+        {
+          "t": 1792437233392,
+          "cost": 0,
+          "tokens": 854245
+        },
+        {
+          "t": 1792437245643,
+          "cost": 0,
+          "tokens": 1010897
+        },
+        {
+          "t": 1792437270273,
+          "cost": 0,
+          "tokens": 1169548
+        },
+        {
+          "t": 1792437367338,
+          "cost": 0,
+          "tokens": 1331989
+        },
+        {
+          "t": 1792437501121,
+          "cost": 0,
+          "tokens": 1498726
+        },
+        {
+          "t": 1792437511842,
+          "cost": 0,
+          "tokens": 1668803
+        },
+        {
+          "t": 1792437594454,
+          "cost": 0,
+          "tokens": 1842934
+        },
+        {
+          "t": 1792437603878,
+          "cost": 0,
+          "tokens": 2020505
+        },
+        {
+          "t": 1792437662252,
+          "cost": 0,
+          "tokens": 2200221
+        },
+        {
+          "t": 1792437674398,
+          "cost": 0,
+          "tokens": 2383345
+        },
+        {
+          "t": 1792437686102,
+          "cost": 0,
+          "tokens": 2569557
+        },
+        {
+          "t": 1792437696349,
+          "cost": 0,
+          "tokens": 2758367
+        },
+        {
+          "t": 1792437703305,
+          "cost": 0,
+          "tokens": 2950101
+        },
+        {
+          "t": 1792437710473,
+          "cost": 0,
+          "tokens": 3145179
+        },
+        {
+          "t": 1792437769577,
+          "cost": 0,
+          "tokens": 3443738
+        },
+        {
+          "t": 1792437810217,
+          "cost": 0,
+          "tokens": 3648188
+        },
+        {
+          "t": 1792437834185,
+          "cost": 0,
+          "tokens": 3857502
+        },
+        {
+          "t": 1792437849845,
+          "cost": 0,
+          "tokens": 4074799
+        },
+        {
+          "t": 1792437872722,
+          "cost": 0,
+          "tokens": 4295848
+        },
+        {
+          "t": 1792437939890,
+          "cost": 0,
+          "tokens": 4524579
+        },
+        {
+          "t": 1792437946101,
+          "cost": 0,
+          "tokens": 4759077
+        },
+        {
+          "t": 1792437958288,
+          "cost": 0,
+          "tokens": 4996561
+        },
+        {
+          "t": 1792438012063,
+          "cost": 0,
+          "tokens": 5251447
+        },
+        {
+          "t": 1792438027866,
+          "cost": 0,
+          "tokens": 5517523
+        },
+        {
+          "t": 1792438047143,
+          "cost": 0,
+          "tokens": 5786850
+        },
+        {
+          "t": 1792438067206,
+          "cost": 0,
+          "tokens": 6064728
+        },
+        {
+          "t": 1792438112449,
+          "cost": 0,
+          "tokens": 6352697
+        },
+        {
+          "t": 1792438237133,
+          "cost": 0,
+          "tokens": 6646263
+        },
+        {
+          "t": 1792438330933,
+          "cost": 0,
+          "tokens": 6944241
+        },
+        {
+          "t": 1792438376904,
+          "cost": 0,
+          "tokens": 7244777
+        },
+        {
+          "t": 1792438702850,
+          "cost": 0,
+          "tokens": 7547436
+        },
+        {
+          "t": 1792438794602,
+          "cost": 0,
+          "tokens": 7852813
+        },
+        {
+          "t": 1792438835246,
+          "cost": 0,
+          "tokens": 8160976
+        },
+        {
+          "t": 1792438846405,
+          "cost": 0,
+          "tokens": 8471276
+        }
+      ],
+      "dispatches": [
+        {
+          "kind": "command",
+          "name": "clear",
+          "start": 1792436755030,
+          "durationMs": 0,
+          "id": "command:80f00d1f-c084-4351-907b-fdcf2207c529:0",
+          "ownerAgentId": "7f1f3f61-7638-478d-b7bd-30c9af7f01b9",
+          "relationshipStatus": "root",
+          "elapsedMs": 0,
+          "status": "completed",
+          "attributionStatus": "unavailable",
+          "attributionScope": "owner-window"
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": true,
+      "rootOwnCostUSD": 0,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "rootOwnTokens": {
+        "input": 174,
+        "output": 63075,
+        "cacheRead": 8293321,
+        "cacheCreation": 114706,
+        "cacheCreation1h": 114706,
+        "total": 8471276
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1792436888818,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 41444
+        },
+        {
+          "t": 1792436892189,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 45497
+        },
+        {
+          "t": 1792436901836,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 54936
+        },
+        {
+          "t": 1792436904577,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 62785
+        },
+        {
+          "t": 1792436917584,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 67685
+        },
+        {
+          "t": 1792437079490,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 68582
+        },
+        {
+          "t": 1792437084992,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 70865
+        },
+        {
+          "t": 1792437090129,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 71525
+        },
+        {
+          "t": 1792437143583,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 72000
+        },
+        {
+          "t": 1792437157514,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 72970
+        },
+        {
+          "t": 1792437166622,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 74082
+        },
+        {
+          "t": 1792437216104,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 75365
+        },
+        {
+          "t": 1792437233392,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 76509
+        },
+        {
+          "t": 1792437238307,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 78022
+        },
+        {
+          "t": 1792437245643,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 78630
+        },
+        {
+          "t": 1792437264336,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 79064
+        },
+        {
+          "t": 1792437270273,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 79587
+        },
+        {
+          "t": 1792437281733,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 80521
+        },
+        {
+          "t": 1792437367338,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 81920
+        },
+        {
+          "t": 1792437493804,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 82435
+        },
+        {
+          "t": 1792437501121,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 84302
+        },
+        {
+          "t": 1792437503632,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 84748
+        },
+        {
+          "t": 1792437511842,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 85329
+        },
+        {
+          "t": 1792437587964,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 86444
+        },
+        {
+          "t": 1792437594454,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 87687
+        },
+        {
+          "t": 1792437600103,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 88459
+        },
+        {
+          "t": 1792437603878,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 89112
+        },
+        {
+          "t": 1792437605927,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 89313
+        },
+        {
+          "t": 1792437662252,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 90403
+        },
+        {
+          "t": 1792437665759,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 90776
+        },
+        {
+          "t": 1792437674398,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 92348
+        },
+        {
+          "t": 1792437680986,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 92774
+        },
+        {
+          "t": 1792437686102,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 93438
+        },
+        {
+          "t": 1792437689375,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 93734
+        },
+        {
+          "t": 1792437696349,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 95076
+        },
+        {
+          "t": 1792437700238,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 95593
+        },
+        {
+          "t": 1792437703305,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 96141
+        },
+        {
+          "t": 1792437708122,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 97451
+        },
+        {
+          "t": 1792437710473,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 97627
+        },
+        {
+          "t": 1792437759709,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 98534
+        },
+        {
+          "t": 1792437764346,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 99560
+        },
+        {
+          "t": 1792437769577,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 100465
+        },
+        {
+          "t": 1792437778681,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 101408
+        },
+        {
+          "t": 1792437810217,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 103042
+        },
+        {
+          "t": 1792437817008,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 103615
+        },
+        {
+          "t": 1792437834185,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 105699
+        },
+        {
+          "t": 1792437845251,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 108509
+        },
+        {
+          "t": 1792437849845,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 108788
+        },
+        {
+          "t": 1792437868278,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 110331
+        },
+        {
+          "t": 1792437872722,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 110718
+        },
+        {
+          "t": 1792437880046,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 112184
+        },
+        {
+          "t": 1792437939890,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 116547
+        },
+        {
+          "t": 1792437943447,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 117125
+        },
+        {
+          "t": 1792437946101,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 117373
+        },
+        {
+          "t": 1792437951630,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 118512
+        },
+        {
+          "t": 1792437958288,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 118972
+        },
+        {
+          "t": 1792437976891,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 124016
+        },
+        {
+          "t": 1792438012063,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 130870
+        },
+        {
+          "t": 1792438019558,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 132201
+        },
+        {
+          "t": 1792438027866,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 133875
+        },
+        {
+          "t": 1792438037236,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 134181
+        },
+        {
+          "t": 1792438047143,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 135146
+        },
+        {
+          "t": 1792438057648,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 136876
+        },
+        {
+          "t": 1792438067206,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 141002
+        },
+        {
+          "t": 1792438105056,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 143611
+        },
+        {
+          "t": 1792438112449,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 144358
+        },
+        {
+          "t": 1792438120587,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 145721
+        },
+        {
+          "t": 1792438237133,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 147845
+        },
+        {
+          "t": 1792438241524,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 148296
+        },
+        {
+          "t": 1792438330933,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 149682
+        },
+        {
+          "t": 1792438371272,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 150042
+        },
+        {
+          "t": 1792438376904,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 150494
+        },
+        {
+          "t": 1792438699888,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 150997
+        },
+        {
+          "t": 1792438702850,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 151662
+        },
+        {
+          "t": 1792438707755,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 152326
+        },
+        {
+          "t": 1792438794602,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 153051
+        },
+        {
+          "t": 1792438799107,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 153880
+        },
+        {
+          "t": 1792438835246,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 154283
+        },
+        {
+          "t": 1792438840161,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 154946
+        },
+        {
+          "t": 1792438846405,
+          "model": "claude-haiku-5-5",
+          "costUSD": 0,
+          "tokens": 155354
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [
+        {
+          "name": "clear",
+          "totalCalls": 1,
+          "successCount": 1,
+          "failureCount": 0
+        }
+      ],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}

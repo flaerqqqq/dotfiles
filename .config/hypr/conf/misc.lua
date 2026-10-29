@@ -8,7 +8,7 @@ hl.config({
 		animate_manual_resizes = true,
 		animate_mouse_windowdragging = false,
 		enable_swallow = false,
-		swallow_regex = "(foot|kitty|allacritty|Alacritty)",
+		swallow_regex = "(foot|ghostty|allacritty|Alacritty)",
 		allow_session_lock_restore = true,
 		session_lock_xray = true,
 		initial_workspace_tracking = false,

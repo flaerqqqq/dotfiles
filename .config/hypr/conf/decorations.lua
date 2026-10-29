@@ -1,8 +1,7 @@
--- ~/.config/hypr/conf/themes/normal/decorations.lua
-
 hl.config({
 	decoration = {
-		rounding = 16,
+		rounding = 18,
+		rounding_power = 3,
 		shadow = {
 			range = 30,
 			render_power = 7,

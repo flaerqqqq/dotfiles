@@ -1,11 +1,11 @@
-local terminal = "kitty"
-local fileManager = "kitty -e yazi"
+local terminal = "ghostty"
+local fileManager = "ghostty -e yazi"
 local browser = "google-chrome"
 local codeEditor = "idea"
 local bluetoothTool = "blueman-manager"
 local soundTool = "pavucontrol"
-local networkTool = "kitty -e nmtui"
-local textEditor = "kitty -e nvim"
+local networkTool = "ghostty -e nmtui"
+local textEditor = "ghostty -e nvim"
 
 local mainMod = "SUPER"
 local SUPER_ALT = "SUPER + ALT"
@@ -186,7 +186,7 @@ hl.define_submap("global", function()
 	hl.bind(mainMod .. " + X", hl.dsp.exec_cmd(textEditor))
 
 	-- tmux attach
-	hl.bind(SUPER_SHIFT .. " + RETURN", hl.dsp.exec_cmd("kitty -e tmux new-session -A -s main"))
+	hl.bind(SUPER_SHIFT .. " + RETURN", hl.dsp.exec_cmd("ghostty -e tmux new-session -A -s main"))
 
 	-- ========== CONFIG ==========
 	-- Reload waybar config

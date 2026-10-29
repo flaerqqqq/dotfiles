@@ -1,0 +1,21 @@
+{
+  "theme": "ink",
+  "theme_colors": {
+    "background": "#1f1f28",
+    "surface": "#1f1f28",
+    "text": "#dcd7ba",
+    "text_muted": "#a3a08e",
+    "accent": "#7e9cd8",
+    "border": "#4e4d4c",
+    "selection_bg": "#454445",
+    "selection_fg": "#dcd7ba",
+    "success": "#76946a",
+    "warning": "#c0a36e",
+    "error": "#c34043",
+    "session_active": "#76946a",
+    "session_none": "#a3a08e",
+    "path": "#6a9589",
+    "missing": "#a3a08e",
+    "connector": "#a3a08e"
+  }
+}

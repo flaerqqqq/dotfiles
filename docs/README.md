@@ -1,3 +1,4 @@
 # Documentation
 
-- [tds](tds.md): tmux dev session launcher. Usage, control flow, profiles, config, and open issues.
+- tds: tmux dev session launcher, documented in ~/dev/projects/tds/README.md (not part of this repo).
+- [themes](themes.md): switch Ghostty and Neovim themes together with `theme`.

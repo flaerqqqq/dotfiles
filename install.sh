@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-EXCLUDE=(".git" ".gitignore" "install.sh" "README.md" "LICENSE" "screenshots")
+EXCLUDE=(".git" ".gitignore" "install.sh" "README.md" "CLAUDE.md" "LICENSE" "screenshots")
 
 is_excluded() {
     local rel="$1"

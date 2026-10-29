@@ -1,0 +1,21 @@
+{
+  "theme": "ink",
+  "theme_colors": {
+    "background": "#1f2430",
+    "surface": "#1f2430",
+    "text": "#cccac2",
+    "text_muted": "#989896",
+    "accent": "#6dcbfa",
+    "border": "#4a4e54",
+    "selection_bg": "#42454d",
+    "selection_fg": "#cccac2",
+    "success": "#87d96c",
+    "warning": "#facc6e",
+    "error": "#ed8274",
+    "session_active": "#87d96c",
+    "session_none": "#989896",
+    "path": "#90e1c6",
+    "missing": "#989896",
+    "connector": "#989896"
+  }
+}

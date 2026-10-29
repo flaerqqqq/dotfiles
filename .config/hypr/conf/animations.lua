@@ -1,5 +1,3 @@
--- ~/.config/hypr/conf/themes/normal/animations.lua
-
 hl.config({
 	animations = {
 		enabled = true,

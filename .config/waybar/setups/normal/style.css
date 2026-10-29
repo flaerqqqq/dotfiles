@@ -2,9 +2,8 @@
 @define-color fg_hi #f5f5fa;
 
 window#waybar {
-    background: rgba(28, 28, 30, 0.60);
+    background: rgba(28, 28, 30, 0.50);
     border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     box-shadow: none;
 }
 

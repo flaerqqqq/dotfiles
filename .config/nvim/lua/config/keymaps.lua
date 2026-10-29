@@ -47,3 +47,8 @@ vim.keymap.set("n", "<leader>oi", function()
 end, { desc = "Organize Imports (JDTLS Direct)" })
 
 vim.keymap.set("n", "<leader>jb", "<Cmd>JavaBuildBuildWorkspace<CR>", { desc = "Build Java Workspace" })
+
+-- Replace LazyVim's colorscheme picker: it never persisted the choice.
+vim.keymap.set("n", "<leader>uC", function()
+    require("config.theme").pick()
+end, { desc = "Select Theme (persistent)" })
