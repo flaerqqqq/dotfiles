@@ -2,10 +2,10 @@ hl.config({
 	general = {
 		gaps_in = 0,
 		gaps_out = 0,
-		border_size = 1,
+        border_size = 1,
 		["col.active_border"] = "rgba(3a3a3aaa)",
 		["col.inactive_border"] = "rgba(2a2a2aaa)",
-		resize_on_border = true,
+        resize_on_border = true,
 		no_focus_fallback = true,
 		allow_tearing = false,
 		layout = "scrolling",

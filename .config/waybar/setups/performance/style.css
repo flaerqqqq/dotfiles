@@ -43,13 +43,11 @@ button {
 }
 
 /* ── Workspaces ─────────────────────────────────────────────── */
-#workspaces {
-    background: transparent;
-    padding: 0 0px;
-    margin: 1 0px;
-}
-
-#workspaces button {
+#custom-ws1,
+#custom-ws2,
+#custom-ws3,
+#custom-ws4,
+#custom-ws5 {
     color: rgba(168, 153, 132, 0.55);
     background: transparent;
     padding: 0 20px;
@@ -64,25 +62,45 @@ button {
         background 150ms ease;
 }
 
-#workspaces button:hover {
+#custom-ws1:hover,
+#custom-ws2:hover,
+#custom-ws3:hover,
+#custom-ws4:hover,
+#custom-ws5:hover {
     color: #d5c4a1;
     background: rgba(168, 153, 132, 0.08);
 }
 
-#workspaces button.active,
-#workspaces button.focused {
+#custom-ws1.active,
+#custom-ws2.active,
+#custom-ws3.active,
+#custom-ws4.active,
+#custom-ws5.active,
+#custom-ws1.focused,
+#custom-ws2.focused,
+#custom-ws3.focused,
+#custom-ws4.focused,
+#custom-ws5.focused {
     color: #fbf1c7;
     background: rgba(255, 255, 255, 0.09);
     /* thin top highlight only — subtle glass hint, no pill */
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-#workspaces button.urgent {
+#custom-ws1.urgent,
+#custom-ws2.urgent,
+#custom-ws3.urgent,
+#custom-ws4.urgent,
+#custom-ws5.urgent {
     color: #fbf1c7;
     background: rgba(204, 36, 29, 0.55);
 }
 
-#workspaces button:not(.active) {
+#custom-ws1:not(.active),
+#custom-ws2:not(.active),
+#custom-ws3:not(.active),
+#custom-ws4:not(.active),
+#custom-ws5:not(.active) {
     opacity: 0.70;
 }
 

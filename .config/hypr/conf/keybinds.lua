@@ -36,12 +36,7 @@ hl.define_submap("global", function()
 	-- ========== WINDOWS ==========
 	hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 	hl.bind(SUPER_SHIFT .. " + F", hl.dsp.window.fullscreen())
-	-- TODO: "layoutmsg, fit active" is a hyprscrolling-plugin message (see
-	-- github.com/hyprwm/hyprland-plugins/hyprscrolling). hl.dsp.layout(msg)
-	-- is the generic "send a message to the active layout" dispatcher used
-	-- for both the builtin scrolling layout and hyprscrolling in the wiki
-	-- examples — verify this still routes to the plugin once you've
-	-- confirmed how the plugin registers itself under Lua (conf/plugins.lua).
+	-- Fit the active column into view (scrolling layout)
 	hl.bind(mainMod .. " + D", hl.dsp.layout("fit active"))
 
 	-- Alt + Tab cycle windows (MRU order)
@@ -56,7 +51,7 @@ hl.define_submap("global", function()
 	hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 	hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-	-- Resize columns for scrolling layout (hyprscrolling)
+	-- Cycle column width (scrolling layout)
 	hl.bind(mainMod .. " + R", hl.dsp.layout("colresize +conf"))
 
 	-- Window toggle floating
@@ -68,25 +63,37 @@ hl.define_submap("global", function()
 	hl.bind(mainMod .. " + K", hl.dsp.focus({ direction = "u" }))
 	hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "r" }))
 
-	-- Move window from column to column L-R
+	-- Move window L-R
 	hl.bind(mainMod .. " + Comma", hl.dsp.window.move({ direction = "l" }))
 	hl.bind(mainMod .. " + Period", hl.dsp.window.move({ direction = "r" }))
 
-	-- Move window U-D inside column
+	-- Move window U-D
 	hl.bind(SUPER_SHIFT .. " + K", hl.dsp.window.move({ direction = "u" }))
 	hl.bind(SUPER_SHIFT .. " + J", hl.dsp.window.move({ direction = "d" }))
 
-	-- Move column L-R (hyprscrolling) + refresh eww tabs widget
-	hl.bind(SUPER_SHIFT .. " + H", function()
-		hl.dispatch(hl.dsp.layout("swapcol l"))
-		hl.dispatch(hl.dsp.exec_cmd("~/.config/eww/hyprland-tabs-refresh.sh"))
-	end)
-	hl.bind(SUPER_SHIFT .. " + L", function()
-		hl.dispatch(hl.dsp.layout("swapcol r"))
-		hl.dispatch(hl.dsp.exec_cmd("~/.config/eww/hyprland-tabs-refresh.sh"))
-	end)
+	-- Move column L-R
+	hl.bind(SUPER_SHIFT .. " + H", hl.dsp.layout("swapcol l"))
+	hl.bind(SUPER_SHIFT .. " + L", hl.dsp.layout("swapcol r"))
 
-	-- Move window out of column (hyprscrolling)
+	-- ========== GROUPS (tabs) ==========
+	-- Toggle the focused window into/out of a tab group
+	hl.bind(mainMod .. " + G", hl.dsp.group.toggle())
+	-- Switch tab
+	hl.bind(mainMod .. " + bracketright", hl.dsp.group.next())
+	hl.bind(mainMod .. " + bracketleft", hl.dsp.group.prev())
+	-- Move the focused window into the group in that direction
+	hl.bind(SUPER_ALT .. " + H", hl.dsp.window.move({ into_group = "l" }))
+	hl.bind(SUPER_ALT .. " + J", hl.dsp.window.move({ into_group = "d" }))
+	hl.bind(SUPER_ALT .. " + K", hl.dsp.window.move({ into_group = "u" }))
+	hl.bind(SUPER_ALT .. " + L", hl.dsp.window.move({ into_group = "r" }))
+	-- Reorder the active tab inside its group
+	-- TODO: argument name is unverified; if these do nothing, check hl.dsp.group.move_window's signature.
+	hl.bind(SUPER_SHIFT .. " + bracketleft", hl.dsp.group.move_window({ forward = false }))
+	hl.bind(SUPER_SHIFT .. " + bracketright", hl.dsp.group.move_window({ forward = true }))
+	-- Pop the focused window out of its group
+	hl.bind(SUPER_ALT .. " + G", hl.dsp.window.move({ out_of_group = true }))
+
+	-- Move window out of its column
 	hl.bind(mainMod .. " + Apostrophe", hl.dsp.layout("promote"))
 
 	-- Move window to next/previous workspace

@@ -10,6 +10,7 @@ require("conf.windowrules_general")
 require("conf.animations")
 require("conf.decorations")
 require("conf.general")
+require("conf.group")
 require("conf.layerrules")
 require("conf.windowrules")
 

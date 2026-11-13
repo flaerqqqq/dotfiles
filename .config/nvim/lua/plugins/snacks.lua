@@ -159,10 +159,26 @@ return {
                             reveal_file = item.file,
                             reveal_force_cwd = false,
                         })
+                        -- Reveal is async; once the cursor lands on the dir, expand it.
+                        local target = item.file:gsub("/$", "")
+                        local tries = 0
+                        local function expand()
+                            tries = tries + 1
+                            local state = require("neo-tree.sources.manager").get_state("filesystem")
+                            local node = state and state.tree and state.tree:get_node()
+                            if node and node.type == "directory" and node:get_id():gsub("/$", "") == target then
+                                if not node:is_expanded() then
+                                    require("neo-tree.sources.filesystem").toggle_directory(state, node)
+                                end
+                            elseif tries < 10 then
+                                vim.defer_fn(expand, 50)
+                            end
+                        end
+                        vim.defer_fn(expand, 50)
                     end,
                 })
             end,
-            desc = "Find dir -> focus Neo-tree",
+            desc = "Find dir -> open in Neo-tree",
         },
         {
             "<leader>nj",

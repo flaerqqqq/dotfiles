@@ -52,3 +52,11 @@ vim.keymap.set("n", "<leader>jb", "<Cmd>JavaBuildBuildWorkspace<CR>", { desc = "
 vim.keymap.set("n", "<leader>uC", function()
     require("config.theme").pick()
 end, { desc = "Select Theme (persistent)" })
+
+-- LazyVim maps <C-hjkl> window navigation in normal mode only. Add visual mode so
+-- a selection can be made and then the cursor moved to another split (e.g. Claude).
+-- No <Esc>: <C-w> works in visual mode, and claudecode.nvim records the selection
+-- as it leaves the window, so :ClaudeCodeSend still sees it.
+for _, key in ipairs({ "h", "j", "k", "l" }) do
+    vim.keymap.set("x", "<C-" .. key .. ">", "<C-w>" .. key, { desc = "Go to window (" .. key .. ")" })
+end

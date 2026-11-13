@@ -59,3 +59,11 @@ hl.layer_rule({
 	match = { namespace = "selection" },
 	no_anim = true,
 })
+
+-- Dynamic Island overlay (~/dev/projects/island-app): blur behind its translucent surfaces.
+-- ignore_alpha keeps the fully transparent pixels around the pill from being blurred.
+hl.layer_rule({
+	match = { namespace = "dynamic-island" },
+	blur = true,
+	ignore_alpha = 0.5,
+})
